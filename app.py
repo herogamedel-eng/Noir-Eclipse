@@ -4,7 +4,6 @@ import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
-from openai import OpenAI
 from datetime import datetime
 
 # Page Setup
@@ -14,30 +13,23 @@ st.set_page_config(page_title="Noir -Eclipse - Cyber Guardian AI", page_icon="�
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-# Load Groq API Key
 groq_api_key = os.getenv("GROQ_API_KEY")
 if not groq_api_key and "GROQ_API_KEY" in st.secrets:
     groq_api_key = st.secrets["GROQ_API_KEY"]
 
 if not groq_api_key:
-    st.error("🔑 Groq API Key missing! Add `GROQ_API_KEY` to your `.env` file or Streamlit Secrets.")
+    st.error("🔑 Groq API Key missing! Add `GROQ_API_KEY` to your `.env` file or Streamlit Cloud Secrets.")
     st.stop()
 
-groq_client = Groq(api_key=groq_api_key)
+client = Groq(api_key=groq_api_key)
 
-# Load Optional OpenAI API Key
-openai_api_key = os.getenv("OPENAI_API_KEY")
-if not openai_api_key and "OPENAI_API_KEY" in st.secrets:
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-openai_client = OpenAI(api_key=openai_api_key) if openai_api_key else None
-
-# --- MODEL SELECTION ROUTER ---
-def resolve_model_execution(choice: str, prompt_text: str) -> tuple[str, str, str]:
+# --- GROQ MODEL ROUTER FUNCTION ---
+def resolve_groq_model(choice: str, prompt_text: str) -> tuple[str, str]:
     """
-    Returns: (provider_name, model_id, model_description)
+    Selects the optimal Groq LLM based on query intent and settings.
+    Returns: (model_id, human_readable_description)
     """
-    if choice == "⚡ Dynamic Auto-Router (Groq)":
+    if choice == "⚡ Dynamic Auto-Router":
         security_keywords = [
             "virus", "malware", "phishing", "hack", "security", "exploit", 
             "cyber", "code", "python", "script", "analyze", "threat", 
@@ -45,19 +37,15 @@ def resolve_model_execution(choice: str, prompt_text: str) -> tuple[str, str, st
         ]
         lowered = prompt_text.lower()
         if any(keyword in lowered for keyword in security_keywords) or len(prompt_text.split()) > 35:
-            return "groq", "llama-3.3-70b-versatile", "🛡️ High-Intelligence Groq Sentinel (70B)"
-        return "groq", "llama-3.1-8b-instant", "⚡ Fast Groq Assistant (8B)"
+            return "llama-3.3-70b-versatile", "🛡️ High-Intelligence Sentinel Model (70B)"
+        return "llama-3.1-8b-instant", "⚡ Ultra-Fast Assistant Model (8B)"
     
-    elif choice == "Groq: Llama 3.3 70B":
-        return "groq", "llama-3.3-70b-versatile", "🛡️ Groq Llama 3.3 (70B)"
-    elif choice == "Groq: Llama 3.1 8B":
-        return "groq", "llama-3.1-8b-instant", "⚡ Groq Llama 3.1 (8B)"
-    elif choice == "OpenAI: GPT-4o Mini":
-        return "openai", "gpt-4o-mini", "🧠 OpenAI GPT-4o Mini"
-    elif choice == "OpenAI: GPT-4o":
-        return "openai", "gpt-4o", "🔥 OpenAI GPT-4o (High Reasoning)"
+    elif choice == "Llama 3.3 70B (High Intelligence)":
+        return "llama-3.3-70b-versatile", "🛡️ Groq Llama 3.3 (70B)"
+    elif choice == "Llama 3.1 8B (Fast Response)":
+        return "llama-3.1-8b-instant", "⚡ Groq Llama 3.1 (8B)"
     
-    return "groq", "llama-3.1-8b-instant", "⚡ Default Groq Model"
+    return "llama-3.1-8b-instant", "⚡ Default Groq Model"
 
 # --- INTERACTIVE ENERGY CORE BRAIN (HTML/CSS) ---
 st.markdown("""
@@ -84,16 +72,14 @@ st.title("⚡ Noir -Eclipse")
 with st.sidebar:
     st.header("⚙️ Noir -Eclipse Settings")
     
-    # Model Provider Selector
-    st.subheader("🤖 Model Selection")
+    # Groq Model Selector
+    st.subheader("🤖 Model Engine")
     model_choice = st.selectbox(
-        "Choose Engine",
+        "Choose Groq Model",
         [
-            "⚡ Dynamic Auto-Router (Groq)",
-            "Groq: Llama 3.3 70B",
-            "Groq: Llama 3.1 8B",
-            "OpenAI: GPT-4o Mini",
-            "OpenAI: GPT-4o"
+            "⚡ Dynamic Auto-Router",
+            "Llama 3.3 70B (High Intelligence)",
+            "Llama 3.1 8B (Fast Response)"
         ]
     )
 
@@ -183,7 +169,7 @@ audio_file = st.audio_input("🎙️ Speak to Noir -Eclipse")
 prompt = None
 
 if audio_file:
-    transcription = groq_client.audio.transcriptions.create(
+    transcription = client.audio.transcriptions.create(
         file=(audio_file.name, audio_file.getvalue()),
         model="whisper-large-v3"
     )
@@ -194,14 +180,14 @@ text_prompt = st.chat_input("Ask Noir -Eclipse or type a security query...")
 if text_prompt:
     prompt = text_prompt
 
-# --- PROCESSING USER INPUT WITH MULTI-MODEL ROUTING ---
+# --- PROCESSING USER INPUT ---
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Determine Provider and Model ID
-    provider, model_id, model_description = resolve_model_execution(model_choice, prompt)
+    # Determine Groq Model ID
+    model_id, model_description = resolve_groq_model(model_choice, prompt)
 
     # Sanitize message payload
     cleaned_messages = [
@@ -212,24 +198,11 @@ if prompt:
     with st.chat_message("assistant"):
         st.caption(f"Engine: `{model_id}` | {model_description}")
         
-        # Route to OpenAI API
-        if provider == "openai":
-            if not openai_client:
-                st.error("🔑 OpenAI API key missing! Add `OPENAI_API_KEY` to your `.env` file or Streamlit Cloud Secrets.")
-                st.stop()
-            
-            response = openai_client.chat.completions.create(
-                model=model_id,
-                messages=cleaned_messages,
-                temperature=0.6,
-            )
-        # Route to Groq API
-        else:
-            response = groq_client.chat.completions.create(
-                model=model_id,
-                messages=cleaned_messages,
-                temperature=0.6,
-            )
+        response = client.chat.completions.create(
+            model=model_id,
+            messages=cleaned_messages,
+            temperature=0.6,
+        )
 
         ai_reply = response.choices[0].message.content
         st.write(ai_reply)
