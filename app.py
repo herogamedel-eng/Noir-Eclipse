@@ -1,5 +1,6 @@
 import os
 import json
+import calendar
 import streamlit as st
 import streamlit.components.v1 as components
 from pathlib import Path
@@ -10,18 +11,18 @@ from datetime import datetime
 # Page Setup
 st.set_page_config(page_title="Noir -Eclipse OS", page_icon="⚡", layout="wide")
 
-# Inject Custom Cyan & Glass HUD Styling
+# Inject Custom High-Tech Cyan Glassmorphism Styling
 st.markdown("""
 <style>
     /* Main Background - Deep Glass OLED Obsidian */
     .stApp {
-        background: radial-gradient(circle at 50% 20%, #030b14 0%, #01050a 60%, #000205 100%);
+        background: radial-gradient(circle at 50% 20%, #031326 0%, #050e1a 60%, #02070d 100%);
         color: #e2e8f0;
     }
     
     /* Vibrant Electric Cyan Title Header */
     .glow-title {
-        font-size: 2.8rem;
+        font-size: 2.6rem;
         font-weight: 900;
         background: linear-gradient(135deg, #00f2fe, #0099ff, #00e5ff);
         -webkit-background-clip: text;
@@ -32,10 +33,10 @@ st.markdown("""
 
     .glow-subtitle {
         color: #00f2fe;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         letter-spacing: 3px;
         text-transform: uppercase;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
         font-weight: 700;
         text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
     }
@@ -90,47 +91,40 @@ st.markdown("""
         box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
     }
 
-    /* Cyan Metrics Containers */
+    /* Card Panels & Containers */
+    .widget-panel {
+        background: rgba(5, 18, 32, 0.75);
+        border: 1px solid rgba(0, 242, 254, 0.25);
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 4px 20px rgba(0, 242, 254, 0.1);
+        backdrop-filter: blur(10px);
+        margin-bottom: 15px;
+    }
+
+    /* Metrics Styling */
     [data-testid="stMetric"] {
         background: rgba(5, 18, 32, 0.75);
         border: 1px solid rgba(0, 242, 254, 0.25);
-        padding: 15px;
+        padding: 12px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 242, 254, 0.1);
-        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.1);
     }
-    
-    [data-testid="stMetricLabel"] {
-        color: #00f2fe !important;
-        font-weight: 700 !important;
-        letter-spacing: 1px;
-    }
+    [data-testid="stMetricLabel"] { color: #00f2fe !important; font-weight: 700 !important; }
+    [data-testid="stMetricValue"] { color: #38bdf8 !important; font-weight: 900 !important; }
 
-    [data-testid="stMetricValue"] {
-        color: #38bdf8 !important;
-        font-weight: 900 !important;
-        text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-    }
-
-    /* Input Styling */
-    .stTextInput > div > div > input, .stSelectbox > div > div {
+    /* Inputs */
+    .stTextInput > div > div > input, .stSelectbox > div > div, .stTextArea > div > div > textarea {
         background: rgba(4, 15, 28, 0.8) !important;
         color: #ffffff !important;
         border: 1px solid rgba(0, 242, 254, 0.3) !important;
         border-radius: 8px !important;
     }
 
-    .stTextInput > div > div > input:focus {
-        border-color: #00f2fe !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.5) !important;
-    }
-
-    /* Chat Panel */
     [data-testid="stChatMessage"] {
         background: rgba(6, 18, 32, 0.6) !important;
         border: 1px solid rgba(0, 242, 254, 0.15);
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -149,7 +143,7 @@ if not groq_api_key:
 
 client = Groq(api_key=groq_api_key)
 
-# --- GROQ MODEL ROUTER FUNCTION ---
+# --- GROQ MODEL ROUTER ---
 def resolve_groq_model(choice: str, prompt_text: str) -> tuple[str, str]:
     if choice == "⚡ Dynamic Auto-Router":
         if len(prompt_text.split()) > 35 or "code" in prompt_text.lower() or "analyze" in prompt_text.lower():
@@ -159,7 +153,7 @@ def resolve_groq_model(choice: str, prompt_text: str) -> tuple[str, str]:
         return "llama-3.3-70b-versatile", "🛡️ Groq Llama 3.3 (70B)"
     return "llama-3.1-8b-instant", "⚡ Groq Llama 3.1 (8B)"
 
-# --- SESSION INITIALIZATION ---
+# --- SESSION STATES ---
 if "chat_library" not in st.session_state:
     st.session_state.chat_library = {}
 
@@ -167,33 +161,26 @@ if "current_chat_id" not in st.session_state:
     st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
     st.session_state.messages = []
 
+if "calc_expr" not in st.session_state:
+    st.session_state.calc_expr = ""
+
+if "todo_list" not in st.session_state:
+    st.session_state.todo_list = ["System Diagnostic Check", "Review Neural Link Parameters"]
+
 def get_system_prompt(target_lang: str) -> str:
-    instructions = (
-        "You are Noir -Eclipse, an advanced Personal AI Assistant. "
-        "Assist with general tasks, answering questions accurately and concisely."
-    )
+    instructions = "You are Noir -Eclipse, an advanced Personal AI Assistant. Respond accurately and concisely."
     if target_lang != "English":
         instructions += f" Translate your final response into {target_lang}."
-    else:
-        instructions += " Always respond in English."
     return instructions
 
-# --- SIDEBAR NAVIGATION ---
+# --- SIDEBAR ---
 with st.sidebar:
-    st.markdown('<div class="glow-title" style="font-size: 2rem;">⚡ NOIR</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-title" style="font-size: 1.8rem;">⚡ NOIR</div>', unsafe_allow_html=True)
     st.markdown('<div class="glow-subtitle">GENESIS AI OS</div>', unsafe_allow_html=True)
     
     st.header("⚙️ Settings")
-    model_choice = st.selectbox(
-        "Choose Groq Model",
-        ["⚡ Dynamic Auto-Router", "Llama 3.3 70B (High Intelligence)", "Llama 3.1 8B (Fast Response)"]
-    )
-    
-    target_lang = st.selectbox(
-        "Target Language", 
-        ["English", "Spanish", "French", "German", "Chinese", "Hindi", "Japanese"],
-        index=0
-    )
+    model_choice = st.selectbox("Groq Model", ["⚡ Dynamic Auto-Router", "Llama 3.3 70B (High Intelligence)", "Llama 3.1 8B (Fast Response)"])
+    target_lang = st.selectbox("Language", ["English", "Spanish", "French", "German", "Chinese", "Hindi", "Japanese"], index=0)
 
     st.divider()
 
@@ -201,7 +188,6 @@ with st.sidebar:
     if st.button("➕ Start New Chat", use_container_width=True):
         if len(st.session_state.messages) > 1:
             st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
-        
         st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
         st.session_state.messages = []
         st.rerun()
@@ -209,31 +195,19 @@ with st.sidebar:
     if st.session_state.chat_library:
         st.subheader("🗂️ Saved Sessions")
         selected_archive = st.selectbox("Select Session", list(st.session_state.chat_library.keys()))
-        
-        btn_col1, btn_col2 = st.columns(2)
-        with btn_col1:
+        btn_c1, btn_c2 = st.columns(2)
+        with btn_c1:
             if st.button("📖 Load", use_container_width=True):
                 st.session_state.messages = st.session_state.chat_library[selected_archive].copy()
                 st.session_state.current_chat_id = selected_archive
                 st.rerun()
-        with btn_col2:
+        with btn_c2:
             if st.button("🗑️ Delete", use_container_width=True):
                 del st.session_state.chat_library[selected_archive]
                 st.rerun()
 
-    if len(st.session_state.messages) > 1:
-        st.subheader("📥 Export")
-        chat_json = json.dumps(st.session_state.messages, indent=2)
-        st.download_button(
-            label="Export JSON",
-            data=chat_json,
-            file_name=f"noir_eclipse_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            mime="application/json",
-            use_container_width=True
-        )
-
 # --- MAIN TABS ---
-tab_console, tab_ember = st.tabs(["💬 AI Console", "🔥 JARVIS HUD Core"])
+tab_console, tab_ember, tab_widgets = st.tabs(["💬 AI Console", "🔥 JARVIS Core", "📊 Utility Dashboard"])
 
 # ==========================================
 # TAB 1: AI CONSOLE
@@ -281,11 +255,7 @@ with tab_console:
 
         with st.chat_message("assistant"):
             st.caption(f"Engine: `{model_id}` | {model_description}")
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=cleaned_messages,
-                temperature=0.6,
-            )
+            response = client.chat.completions.create(model=model_id, messages=cleaned_messages, temperature=0.6)
             ai_reply = response.choices[0].message.content
             st.write(ai_reply)
             st.session_state.messages.append({"role": "assistant", "content": ai_reply})
@@ -293,27 +263,17 @@ with tab_console:
         st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
 
 # ==========================================
-# TAB 2: TRANSPARENT GLASS JARVIS HUD
+# TAB 2: JARVIS HUD
 # ==========================================
 with tab_ember:
     st.markdown('<div class="glow-title">⚡ J.A.R.V.I.S. HUD Core</div>', unsafe_allow_html=True)
     st.markdown('<div class="glow-subtitle">REAL-TIME HOLOGRAPHIC TRANSPARENT DISPLAY UI</div>', unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     with c1:
         core_scale = st.slider("RING RADIUS", 0.7, 1.5, 1.0, 0.05)
     with c2:
         rot_speed = st.slider("ROTATION SPEED", 0.5, 3.0, 1.2, 0.1)
-    with c3:
-        hud_theme = st.selectbox("HUD SPECTRUM", ["Cyan Arc", "Electric Blue", "Matrix Green", "Amber Glow"])
-
-    color_maps = {
-        "Cyan Arc": {"primary": "#00f2fe", "secondary": "#0099ff", "glow": "rgba(0, 242, 254, 0.8)"},
-        "Electric Blue": {"primary": "#3b82f6", "secondary": "#60a5fa", "glow": "rgba(59, 130, 246, 0.8)"},
-        "Matrix Green": {"primary": "#10b981", "secondary": "#34d399", "glow": "rgba(16, 185, 129, 0.8)"},
-        "Amber Glow": {"primary": "#ffaa00", "secondary": "#ffd700", "glow": "rgba(255, 170, 0, 0.8)"}
-    }
-    active_colors = color_maps[hud_theme]
 
     transparent_hud_html = f"""
     <!DOCTYPE html>
@@ -323,284 +283,248 @@ with tab_ember:
             * {{ margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }}
             body {{
                 background: #02060c;
-                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+                font-family: 'Segoe UI', system-ui, sans-serif;
                 color: #e2e8f0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 620px;
+                height: 520px;
                 border: 1px solid rgba(0, 242, 254, 0.25);
                 border-radius: 16px;
                 position: relative;
                 box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.15);
-                user-select: none;
             }}
-            #hud-container {{ position: relative; width: 100%; height: 100%; }}
             canvas {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; }}
-            
-            /* Left side telemetry widgets like image */
-            .left-widget-panel {{
-                position: absolute;
-                top: 40px;
-                left: 35px;
-                display: flex;
-                flex-direction: column;
-                gap: 18px;
-                z-index: 10;
-                width: 220px;
+            .status-badge {{
+                position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+                display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 10;
             }}
-            .widget-box {{
-                background: rgba(4, 15, 28, 0.5);
-                border-left: 2px solid {active_colors["primary"]};
-                padding: 10px 14px;
-                border-radius: 0 8px 8px 0;
-                backdrop-filter: blur(8px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            }}
-            .widget-title {{
-                font-size: 10px;
-                letter-spacing: 1.5px;
-                color: {active_colors["primary"]};
-                font-weight: 700;
-                text-transform: uppercase;
-                margin-bottom: 4px;
-            }}
-            .widget-body {{
-                font-size: 12px;
-                color: #ffffff;
-                font-weight: 600;
-            }}
-            .widget-sub {{
-                font-size: 9px;
-                color: #64748b;
-            }}
-
-            /* Bottom active status indicator matching image */
-            .center-status-badge {{
-                position: absolute;
-                bottom: 50px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 4px;
-                z-index: 10;
-            }}
-            .status-tag {{
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 12px;
-                font-weight: 800;
-                letter-spacing: 3px;
-                color: {active_colors["primary"]};
-                text-shadow: 0 0 10px {active_colors["primary"]};
-            }}
-            .status-dot {{
-                width: 8px;
-                height: 8px;
-                background-color: {active_colors["primary"]};
-                border-radius: 50%;
-                box-shadow: 0 0 10px {active_colors["primary"]};
-                animation: pulse 1.5s infinite;
-            }}
-            .status-subtext {{
-                font-size: 9px;
-                letter-spacing: 1px;
-                color: rgba(255, 255, 255, 0.4);
-            }}
-
-            @keyframes pulse {{
-                0% {{ opacity: 0.3; transform: scale(0.8); }}
-                50% {{ opacity: 1; transform: scale(1.2); }}
-                100% {{ opacity: 0.3; transform: scale(0.8); }}
-            }}
+            .status-tag {{ font-size: 12px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe; }}
         </style>
     </head>
     <body>
-        <div id="hud-container">
-            <canvas id="hudCanvas"></canvas>
-
-            <!-- LEFT TELEMETRY WIDGETS (Matching photo visual elements) -->
-            <div class="left-widget-panel">
-                <div class="widget-box">
-                    <div class="widget-title">AUDIO SYSTEM</div>
-                    <div class="widget-body">Too Many Nights</div>
-                    <div class="widget-sub">feat. Don Toliver...</div>
-                </div>
-
-                <div class="widget-box">
-                    <div class="widget-title">SYSTEM METRICS</div>
-                    <div class="widget-body">CPU: 24% | RAM: 58%</div>
-                    <div class="widget-sub">CORE TEMP: 48°C</div>
-                </div>
-
-                <div class="widget-box">
-                    <div class="widget-title">LINK STATUS</div>
-                    <div class="widget-body">QUANTUM ENCRYPTION</div>
-                    <div class="widget-sub">PING: 2ms // SECURE</div>
-                </div>
-            </div>
-
-            <!-- CENTER STATUS DISPLAY -->
-            <div class="center-status-badge">
-                <div class="status-tag">
-                    <div class="status-dot"></div>
-                    ACTIVE
-                </div>
-                <div class="status-subtext">J.A.R.V.I.S. is online. Click status to disconnect.</div>
-            </div>
+        <canvas id="hudCanvas"></canvas>
+        <div class="status-badge">
+            <div class="status-tag">⚡ CORE ACTIVE</div>
+            <div style="font-size: 9px; color: rgba(255, 255, 255, 0.4);">J.A.R.V.I.S. ONLINE // SYSTEM NOMINAL</div>
         </div>
-
         <script>
             const canvas = document.getElementById('hudCanvas');
             const ctx = canvas.getContext('2d');
-
             let width, height;
-            function resize() {{
-                width = canvas.width = canvas.offsetWidth;
-                height = canvas.height = canvas.offsetHeight;
-            }}
+            function resize() {{ width = canvas.width = canvas.offsetWidth; height = canvas.height = canvas.offsetHeight; }}
             resize();
             window.addEventListener('resize', resize);
 
-            const primary = "{active_colors["primary"]}";
-            const secondary = "{active_colors["secondary"]}";
-            const baseScale = {core_scale};
-            const speed = {rot_speed};
-
             let angle = 0;
-            let waveOffset = 0;
+            function render() {{
+                ctx.clearRect(0, 0, width, height);
+                angle += 0.01 * {rot_speed};
+                const cx = width / 2, cy = height / 2 - 10, r = 100 * {core_scale};
 
-            function drawJARVISRing(cx, cy, radius) {{
                 ctx.save();
                 ctx.translate(cx, cy);
 
-                // --- 1. OUTERMOST THIN GLOW RING ---
-                ctx.beginPath();
-                ctx.arc(0, 0, radius * 1.35, 0, Math.PI * 2);
-                ctx.strokeStyle = primary;
-                ctx.globalAlpha = 0.3;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // --- 2. SEGMENTED DASHED RING ---
+                // Segmented Outer Ring
                 ctx.save();
-                ctx.rotate(angle * 0.4);
+                ctx.rotate(angle);
                 ctx.beginPath();
-                ctx.arc(0, 0, radius * 1.22, 0, Math.PI * 2);
-                ctx.strokeStyle = primary;
-                ctx.globalAlpha = 0.8;
-                ctx.lineWidth = 4;
-                ctx.setLineDash([12, 18, 4, 18]);
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = primary;
+                ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
+                ctx.strokeStyle = '#00f2fe';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([12, 16, 4, 16]);
                 ctx.stroke();
                 ctx.restore();
 
-                // --- 3. INNER RADIAL TICK MARKS (Identical to J.A.R.V.I.S image) ---
+                // Inner Ticks
                 ctx.save();
-                ctx.rotate(-angle * 0.6);
-                const ticks = 60;
-                for (let i = 0; i < ticks; i++) {{
-                    const a = (i * Math.PI * 2) / ticks;
-                    const innerR = radius * 0.92;
-                    const outerR = (i % 5 === 0) ? radius * 1.08 : radius * 1.02;
-                    
+                ctx.rotate(-angle * 0.5);
+                for (let i = 0; i < 48; i++) {{
+                    const a = (i * Math.PI * 2) / 48;
                     ctx.beginPath();
-                    ctx.moveTo(Math.cos(a) * innerR, Math.sin(a) * innerR);
-                    ctx.lineTo(Math.cos(a) * outerR, Math.sin(a) * outerR);
-                    ctx.strokeStyle = (i % 5 === 0) ? primary : secondary;
-                    ctx.lineWidth = (i % 5 === 0) ? 2.5 : 1;
-                    ctx.globalAlpha = (i % 5 === 0) ? 0.9 : 0.4;
+                    ctx.moveTo(Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9);
+                    ctx.lineTo(Math.cos(a) * r * 1.05, Math.sin(a) * r * 1.05);
+                    ctx.strokeStyle = i % 4 === 0 ? '#00f2fe' : '#0072ff';
+                    ctx.lineWidth = i % 4 === 0 ? 2 : 1;
                     ctx.stroke();
                 }}
                 ctx.restore();
 
-                // --- 4. SOLID INNER DOUBLE RINGS ---
+                // Solid Core Ring
                 ctx.beginPath();
-                ctx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
-                ctx.strokeStyle = primary;
-                ctx.lineWidth = 3;
-                ctx.globalAlpha = 0.95;
+                ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+                ctx.strokeStyle = '#00f2fe';
+                ctx.lineWidth = 2.5;
                 ctx.shadowBlur = 15;
-                ctx.shadowColor = primary;
+                ctx.shadowColor = '#00f2fe';
                 ctx.stroke();
 
-                ctx.beginPath();
-                ctx.arc(0, 0, radius * 0.82, 0, Math.PI * 2);
-                ctx.strokeStyle = secondary;
-                ctx.lineWidth = 1;
-                ctx.globalAlpha = 0.5;
-                ctx.stroke();
-
-                // --- 5. CENTER "J.A.R.V.I.S." TEXT ---
-                ctx.font = `900 ${{Math.round(26 * baseScale)}}px 'Segoe UI', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                // Center Text
+                ctx.font = '900 22px sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = primary;
                 ctx.fillText('J.A.R.V.I.S.', 0, 0);
 
                 ctx.restore();
-            }}
-
-            // Draw Bottom Left Oscilloscope Waveform from image
-            function drawWaveform() {{
-                ctx.save();
-                ctx.beginPath();
-                const startX = 35;
-                const startY = height - 70;
-                const waveWidth = 180;
-
-                ctx.moveTo(startX, startY);
-                for (let x = 0; x < waveWidth; x += 4) {{
-                    const y = startY + Math.sin((x * 0.1) + waveOffset) * 12 * Math.cos((x * 0.05) + waveOffset);
-                    ctx.lineTo(startX + x, y);
-                }}
-
-                ctx.strokeStyle = primary;
-                ctx.lineWidth = 2;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = primary;
-                ctx.globalAlpha = 0.8;
-                ctx.stroke();
-                ctx.restore();
-            }}
-
-            function render() {{
-                ctx.clearRect(0, 0, width, height);
-
-                angle += 0.01 * speed;
-                waveOffset += 0.08;
-
-                const centerX = width / 2;
-                const centerY = height / 2 - 20;
-                const radius = 110 * baseScale;
-
-                // Center Hologram Core Ring
-                drawJARVISRing(centerX, centerY, radius);
-
-                // Waveform graph at bottom left
-                drawWaveform();
-
                 requestAnimationFrame(render);
             }}
-
             render();
         </script>
     </body>
     </html>
     """
+    components.html(transparent_hud_html, height=540)
 
-    components.html(transparent_hud_html, height=640)
+# ==========================================
+# TAB 3: UTILITY WIDGETS DASHBOARD
+# ==========================================
+with tab_widgets:
+    st.markdown('<div class="glow-title">📊 OS Workspace & Widgets</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">TACTICAL DASHBOARD & UTILITY SUITE</div>', unsafe_allow_html=True)
 
-    # Telemetry metrics
-    st.markdown("### ⚙️ JARVIS System Diagnostics")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Core Temperature", "48.00 °C", "-0.2°C")
-    m2.metric("Neural Link", "99.98%", "+0.01%")
-    m3.metric("Quantum Sync", "4.8 GHz", "Nominal")
-    m4.metric("Reactor Output", "1.21 GW", "Stable")
+    # TOP BANNER: LIVE CLOCK & DATE WIDGET
+    clock_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                background: rgba(5, 18, 32, 0.8);
+                border: 1px solid rgba(0, 242, 254, 0.3);
+                border-radius: 12px;
+                padding: 15px 25px;
+                color: #ffffff;
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+            }
+            .time-text {
+                font-size: 38px;
+                font-weight: 900;
+                color: #00f2fe;
+                letter-spacing: 2px;
+                text-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+            }
+            .date-text {
+                font-size: 16px;
+                font-weight: 700;
+                color: #94a3b8;
+                letter-spacing: 1.5px;
+                text-align: right;
+            }
+            .sys-tag {
+                font-size: 10px;
+                letter-spacing: 2px;
+                color: #00f2fe;
+                text-transform: uppercase;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <div class="sys-tag">LOCAL SYSTEM TIME</div>
+            <div id="clock" class="time-text">00:00:00 AM</div>
+        </div>
+        <div>
+            <div class="sys-tag" style="text-align: right;">DATE // CALENDAR</div>
+            <div id="date" class="date-text">Loading...</div>
+        </div>
+        <script>
+            function updateClock() {
+                const now = new Date();
+                document.getElementById('clock').innerText = now.toLocaleTimeString();
+                document.getElementById('date').innerText = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+        </script>
+    </body>
+    </html>
+    """
+    components.html(clock_html, height=100)
+
+    col_left, col_right = st.columns([1, 1])
+
+    # LEFT COLUMN: CALCULATOR & TASK MANAGER
+    with col_left:
+        st.markdown('<div class="widget-panel">', unsafe_allow_html=True)
+        st.subheader("🧮 Tactical Calculator")
+        
+        # Display Calculator Screen
+        st.text_input("Expression", value=st.session_state.calc_expr, key="calc_display", disabled=True)
+
+        # Calculator Buttons Grid
+        b_col1, b_col2, b_col3, b_col4 = st.columns(4)
+        with b_col1:
+            if st.button("7", use_container_width=True): st.session_state.calc_expr += "7"; st.rerun()
+            if st.button("4", use_container_width=True): st.session_state.calc_expr += "4"; st.rerun()
+            if st.button("1", use_container_width=True): st.session_state.calc_expr += "1"; st.rerun()
+            if st.button("C", use_container_width=True): st.session_state.calc_expr = ""; st.rerun()
+
+        with b_col2:
+            if st.button("8", use_container_width=True): st.session_state.calc_expr += "8"; st.rerun()
+            if st.button("5", use_container_width=True): st.session_state.calc_expr += "5"; st.rerun()
+            if st.button("2", use_container_width=True): st.session_state.calc_expr += "2"; st.rerun()
+            if st.button("0", use_container_width=True): st.session_state.calc_expr += "0"; st.rerun()
+
+        with b_col3:
+            if st.button("9", use_container_width=True): st.session_state.calc_expr += "9"; st.rerun()
+            if st.button("6", use_container_width=True): st.session_state.calc_expr += "6"; st.rerun()
+            if st.button("3", use_container_width=True): st.session_state.calc_expr += "3"; st.rerun()
+            if st.button(".", use_container_width=True): st.session_state.calc_expr += "."; st.rerun()
+
+        with b_col4:
+            if st.button("÷", use_container_width=True): st.session_state.calc_expr += "/"; st.rerun()
+            if st.button("×", use_container_width=True): st.session_state.calc_expr += "*"; st.rerun()
+            if st.button("-", use_container_width=True): st.session_state.calc_expr += "-"; st.rerun()
+            if st.button("+", use_container_width=True): st.session_state.calc_expr += "+"; st.rerun()
+
+        if st.button("=", use_container_width=True):
+            try:
+                st.session_state.calc_expr = str(eval(st.session_state.calc_expr))
+            except Exception:
+                st.session_state.calc_expr = "Error"
+            st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # TASK MANAGER WIDGET
+        st.markdown('<div class="widget-panel">', unsafe_allow_html=True)
+        st.subheader("📋 System Task Tracker")
+        
+        new_task = st.text_input("Add Mission / Task", placeholder="Enter new task...")
+        if st.button("➕ Add Task", use_container_width=True) and new_task:
+            st.session_state.todo_list.append(new_task)
+            st.rerun()
+
+        st.write("---")
+        for idx, task in enumerate(st.session_state.todo_list):
+            t_col1, t_col2 = st.columns([4, 1])
+            t_col1.write(f"• {task}")
+            if t_col2.button("✖", key=f"del_{idx}"):
+                st.session_state.todo_list.pop(idx)
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # RIGHT COLUMN: INTERACTIVE CALENDAR & QUICK SCRATCHPAD
+    with col_right:
+        st.markdown('<div class="widget-panel">', unsafe_allow_html=True)
+        st.subheader("📅 Interactive Calendar")
+        
+        selected_date = st.date_input("Select Date", datetime.now())
+        
+        # Monthly Calendar Grid View
+        year = selected_date.year
+        month = selected_date.month
+        cal = calendar.month(year, month)
+        
+        st.code(cal, language="text")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # QUICK NOTES SCRATCHPAD
+        st.markdown('<div class="widget-panel">', unsafe_allow_html=True)
+        st.subheader("📝 Encrypted Scratchpad")
+        st.text_area("Quick AI Notes", height=160, placeholder="Type temporary ideas, calculations, or system prompts here...")
+        st.markdown('</div>', unsafe_allow_html=True)
