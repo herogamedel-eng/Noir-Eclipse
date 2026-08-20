@@ -10,29 +10,29 @@ from datetime import datetime
 # Page Setup
 st.set_page_config(page_title="Noir -Eclipse OS", page_icon="⚡", layout="wide")
 
-# Inject Custom High-Tech Blue & Cyan Cyber Styling (No Pink/Purple)
+# Inject Custom Cyan & Glass HUD Styling
 st.markdown("""
 <style>
-    /* Main Background Gradient - Deep Oceanic Charcoal */
+    /* Main Background - Deep Glass OLED Obsidian */
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #031326 0%, #050e1a 50%, #02070d 100%);
+        background: radial-gradient(circle at 50% 20%, #030b14 0%, #01050a 60%, #000205 100%);
         color: #e2e8f0;
     }
     
-    /* Vibrant Cyan & Electric Blue Gradient Header */
+    /* Vibrant Electric Cyan Title Header */
     .glow-title {
         font-size: 2.8rem;
         font-weight: 900;
-        background: linear-gradient(135deg, #00f2fe, #0072ff, #3b82f6);
+        background: linear-gradient(135deg, #00f2fe, #0099ff, #00e5ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+        text-shadow: 0 0 30px rgba(0, 242, 254, 0.4);
         margin-bottom: 0.1rem;
     }
 
     .glow-subtitle {
         color: #00f2fe;
-        font-size: 1rem;
+        font-size: 0.95rem;
         letter-spacing: 3px;
         text-transform: uppercase;
         margin-bottom: 1.5rem;
@@ -42,14 +42,14 @@ st.markdown("""
 
     /* Sidebar Glassmorphism & Glowing Cyan Borders */
     [data-testid="stSidebar"] {
-        background: rgba(8, 20, 36, 0.85) !important;
-        border-right: 1px solid rgba(0, 242, 254, 0.3) !important;
-        box-shadow: 5px 0 25px rgba(0, 242, 254, 0.15) !important;
+        background: rgba(4, 12, 22, 0.9) !important;
+        border-right: 1px solid rgba(0, 242, 254, 0.25) !important;
+        box-shadow: 5px 0 25px rgba(0, 242, 254, 0.1) !important;
     }
 
-    /* Custom Electric Cyan & Blue Buttons */
+    /* Custom Cyan HUD Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #0072ff, #00f2fe) !important;
+        background: linear-gradient(135deg, #0055ff, #00f2fe) !important;
         color: #ffffff !important;
         border: none !important;
         border-radius: 8px !important;
@@ -62,7 +62,7 @@ st.markdown("""
     .stButton > button:hover {
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6) !important;
-        background: linear-gradient(135deg, #00f2fe, #3b82f6) !important;
+        background: linear-gradient(135deg, #00f2fe, #0088ff) !important;
     }
 
     /* Tab Navigation Header Styling */
@@ -73,31 +73,30 @@ st.markdown("""
 
     .stTabs [data-baseweb="tab"] {
         height: 50px;
-        white-space: pre-wrap;
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.02);
         border-radius: 10px 10px 0px 0px;
-        color: #a0aec0;
+        color: #94a3b8;
         font-weight: 700;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         padding: 0px 24px;
         transition: all 0.3s ease;
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(0, 114, 255, 0.25), rgba(0, 242, 254, 0.25)) !important;
+        background: linear-gradient(135deg, rgba(0, 150, 255, 0.2), rgba(0, 242, 254, 0.25)) !important;
         color: #ffffff !important;
         border-bottom: 3px solid #00f2fe !important;
-        border-top: 1px solid rgba(0, 242, 254, 0.5) !important;
-        box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+        border-top: 1px solid rgba(0, 242, 254, 0.4) !important;
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
     }
 
-    /* Cyan Metrics Card Containers */
+    /* Cyan Metrics Containers */
     [data-testid="stMetric"] {
-        background: rgba(10, 25, 45, 0.7);
-        border: 1px solid rgba(0, 242, 254, 0.3);
+        background: rgba(5, 18, 32, 0.75);
+        border: 1px solid rgba(0, 242, 254, 0.25);
         padding: 15px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+        box-shadow: 0 4px 20px rgba(0, 242, 254, 0.1);
         backdrop-filter: blur(10px);
     }
     
@@ -110,33 +109,33 @@ st.markdown("""
     [data-testid="stMetricValue"] {
         color: #38bdf8 !important;
         font-weight: 900 !important;
-        text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
     }
 
-    /* Glowing Select Boxes & Text Inputs */
+    /* Input Styling */
     .stTextInput > div > div > input, .stSelectbox > div > div {
-        background: rgba(10, 20, 35, 0.8) !important;
+        background: rgba(4, 15, 28, 0.8) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(0, 242, 254, 0.4) !important;
+        border: 1px solid rgba(0, 242, 254, 0.3) !important;
         border-radius: 8px !important;
     }
 
     .stTextInput > div > div > input:focus {
         border-color: #00f2fe !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.6) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.5) !important;
     }
 
-    /* Chat Messages Glass Panel */
+    /* Chat Panel */
     [data-testid="stChatMessage"] {
-        background: rgba(10, 22, 40, 0.6) !important;
-        border: 1px solid rgba(0, 242, 254, 0.2);
+        background: rgba(6, 18, 32, 0.6) !important;
+        border: 1px solid rgba(0, 242, 254, 0.15);
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SAFE API KEY LOADING ---
+# --- API KEY & CLIENT LOAD ---
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
@@ -160,7 +159,7 @@ def resolve_groq_model(choice: str, prompt_text: str) -> tuple[str, str]:
         return "llama-3.3-70b-versatile", "🛡️ Groq Llama 3.3 (70B)"
     return "llama-3.1-8b-instant", "⚡ Groq Llama 3.1 (8B)"
 
-# --- AUTOMATIC SESSION INITIALIZATION ---
+# --- SESSION INITIALIZATION ---
 if "chat_library" not in st.session_state:
     st.session_state.chat_library = {}
 
@@ -168,7 +167,6 @@ if "current_chat_id" not in st.session_state:
     st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
     st.session_state.messages = []
 
-# --- SYSTEM PROMPT HELPER ---
 def get_system_prompt(target_lang: str) -> str:
     instructions = (
         "You are Noir -Eclipse, an advanced Personal AI Assistant. "
@@ -180,7 +178,7 @@ def get_system_prompt(target_lang: str) -> str:
         instructions += " Always respond in English."
     return instructions
 
-# --- SIDEBAR: SETTINGS & LIBRARY ---
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.markdown('<div class="glow-title" style="font-size: 2rem;">⚡ NOIR</div>', unsafe_allow_html=True)
     st.markdown('<div class="glow-subtitle">GENESIS AI OS</div>', unsafe_allow_html=True)
@@ -199,9 +197,7 @@ with st.sidebar:
 
     st.divider()
 
-    # --- SIDEBAR LIBRARY ---
     st.header("📚 Library")
-
     if st.button("➕ Start New Chat", use_container_width=True):
         if len(st.session_state.messages) > 1:
             st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
@@ -211,8 +207,8 @@ with st.sidebar:
         st.rerun()
 
     if st.session_state.chat_library:
-        st.subheader("🗂️ Auto-Saved Chats")
-        selected_archive = st.selectbox("Select Previous Session", list(st.session_state.chat_library.keys()))
+        st.subheader("🗂️ Saved Sessions")
+        selected_archive = st.selectbox("Select Session", list(st.session_state.chat_library.keys()))
         
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
@@ -236,8 +232,8 @@ with st.sidebar:
             use_container_width=True
         )
 
-# --- MAIN NAVIGATION TABS ---
-tab_console, tab_ember = st.tabs(["💬 AI Console", "🔥 Ember Core"])
+# --- MAIN TABS ---
+tab_console, tab_ember = st.tabs(["💬 AI Console", "🔥 JARVIS HUD Core"])
 
 # ==========================================
 # TAB 1: AI CONSOLE
@@ -252,7 +248,6 @@ with tab_console:
     else:
         st.session_state.messages[0] = {"role": "system", "content": sys_prompt}
 
-    # Display Chat History
     for msg in st.session_state.messages:
         if msg["role"] != "system":
             with st.chat_message(msg["role"]):
@@ -298,103 +293,168 @@ with tab_console:
         st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
 
 # ==========================================
-# TAB 2: JARVIS HUD & EMBER CORE
+# TAB 2: TRANSPARENT GLASS JARVIS HUD
 # ==========================================
 with tab_ember:
-    st.markdown('<div class="glow-title">🔥 Ember Arc Reactor</div>', unsafe_allow_html=True)
-    st.markdown('<div class="glow-subtitle">HOLOGRAPHIC JARVIS INTERFACE & TELEMETRY</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-title">⚡ J.A.R.V.I.S. HUD Core</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">REAL-TIME HOLOGRAPHIC TRANSPARENT DISPLAY UI</div>', unsafe_allow_html=True)
 
-    # Core Aspect Controls
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     with c1:
-        core_scale = st.slider("CORE SCALE", 0.5, 2.0, 1.1, 0.1)
+        core_scale = st.slider("RING RADIUS", 0.7, 1.5, 1.0, 0.05)
     with c2:
-        ring_density = st.slider("ORBITAL RINGS", 2, 12, 6, 1)
+        rot_speed = st.slider("ROTATION SPEED", 0.5, 3.0, 1.2, 0.1)
     with c3:
-        particle_count = st.slider("PARTICLE FLUX", 100, 500, 250, 50)
-    with c4:
-        theme_choice = st.selectbox("HUD THEME", ["Cyan Cyberpunk", "Emerald Matrix", "Neon Gold", "Red Alert"])
+        hud_theme = st.selectbox("HUD SPECTRUM", ["Cyan Arc", "Electric Blue", "Matrix Green", "Amber Glow"])
 
-    theme_presets = {
-        "Cyan Cyberpunk": {"primary": "#00f2fe", "secondary": "#4facfe", "hud": "#00f2fe"},
-        "Emerald Matrix": {"primary": "#10b981", "secondary": "#34d399", "hud": "#059669"},
-        "Neon Gold": {"primary": "#ffaa00", "secondary": "#ffd700", "hud": "#ffaa00"},
-        "Red Alert": {"primary": "#f87171", "secondary": "#fb923c", "hud": "#ef4444"}
+    color_maps = {
+        "Cyan Arc": {"primary": "#00f2fe", "secondary": "#0099ff", "glow": "rgba(0, 242, 254, 0.8)"},
+        "Electric Blue": {"primary": "#3b82f6", "secondary": "#60a5fa", "glow": "rgba(59, 130, 246, 0.8)"},
+        "Matrix Green": {"primary": "#10b981", "secondary": "#34d399", "glow": "rgba(16, 185, 129, 0.8)"},
+        "Amber Glow": {"primary": "#ffaa00", "secondary": "#ffd700", "glow": "rgba(255, 170, 0, 0.8)"}
     }
-    active_theme = theme_presets[theme_choice]
+    active_colors = color_maps[hud_theme]
 
-    jarvis_canvas_html = f"""
+    transparent_hud_html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <style>
             * {{ margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }}
             body {{
-                background: #030812;
-                font-family: 'Courier New', monospace;
+                background: #02060c;
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
                 color: #e2e8f0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 600px;
-                border: 1px solid {active_theme["primary"]}55;
+                height: 620px;
+                border: 1px solid rgba(0, 242, 254, 0.25);
                 border-radius: 16px;
                 position: relative;
-                box-shadow: 0 0 35px {active_theme["primary"]}22;
+                box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.15);
                 user-select: none;
             }}
-            #canvas-container {{ position: relative; width: 100%; height: 100%; cursor: crosshair; }}
+            #hud-container {{ position: relative; width: 100%; height: 100%; }}
             canvas {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; }}
             
-            /* HUD Overlays */
-            .hud-header {{
-                position: absolute; top: 20px; left: 25px;
-                font-size: 12px; letter-spacing: 2px; color: {active_theme["hud"]};
-                font-weight: bold; text-shadow: 0 0 10px {active_theme["hud"]};
+            /* Left side telemetry widgets like image */
+            .left-widget-panel {{
+                position: absolute;
+                top: 40px;
+                left: 35px;
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+                z-index: 10;
+                width: 220px;
             }}
-            .hud-top-right {{
-                position: absolute; top: 20px; right: 25px;
-                font-size: 10px; letter-spacing: 2px; color: {active_theme["secondary"]};
-                text-align: right; text-shadow: 0 0 8px {active_theme["secondary"]};
+            .widget-box {{
+                background: rgba(4, 15, 28, 0.5);
+                border-left: 2px solid {active_colors["primary"]};
+                padding: 10px 14px;
+                border-radius: 0 8px 8px 0;
+                backdrop-filter: blur(8px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             }}
-            .hud-bottom-left {{
-                position: absolute; bottom: 25px; left: 25px;
+            .widget-title {{
+                font-size: 10px;
+                letter-spacing: 1.5px;
+                color: {active_colors["primary"]};
+                font-weight: 700;
+                text-transform: uppercase;
+                margin-bottom: 4px;
             }}
-            .hud-bottom-left .label {{ font-size: 9px; color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; }}
-            .hud-bottom-left .value {{ font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-shadow: 0 0 15px {active_theme["primary"]}; }}
-            .hud-bottom-left .status {{ font-size: 11px; color: {active_theme["hud"]}; letter-spacing: 1.5px; font-weight: bold; }}
-            
-            .hud-bottom-right {{
-                position: absolute; bottom: 25px; right: 25px; text-align: right;
-                font-size: 10px; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px;
+            .widget-body {{
+                font-size: 12px;
+                color: #ffffff;
+                font-weight: 600;
+            }}
+            .widget-sub {{
+                font-size: 9px;
+                color: #64748b;
+            }}
+
+            /* Bottom active status indicator matching image */
+            .center-status-badge {{
+                position: absolute;
+                bottom: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                z-index: 10;
+            }}
+            .status-tag {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                font-weight: 800;
+                letter-spacing: 3px;
+                color: {active_colors["primary"]};
+                text-shadow: 0 0 10px {active_colors["primary"]};
+            }}
+            .status-dot {{
+                width: 8px;
+                height: 8px;
+                background-color: {active_colors["primary"]};
+                border-radius: 50%;
+                box-shadow: 0 0 10px {active_colors["primary"]};
+                animation: pulse 1.5s infinite;
+            }}
+            .status-subtext {{
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: rgba(255, 255, 255, 0.4);
+            }}
+
+            @keyframes pulse {{
+                0% {{ opacity: 0.3; transform: scale(0.8); }}
+                50% {{ opacity: 1; transform: scale(1.2); }}
+                100% {{ opacity: 0.3; transform: scale(0.8); }}
             }}
         </style>
     </head>
     <body>
-        <div id="canvas-container">
-            <canvas id="jarvisCanvas"></canvas>
+        <div id="hud-container">
+            <canvas id="hudCanvas"></canvas>
 
-            <!-- HUD TELEMETRY OVERLAYS -->
-            <div class="hud-header">ANALYSING DATA // REACTOR CORE</div>
-            <div class="hud-top-right">
-                SYSTEM CHECK: OK<br>
-                SPECTRUM: ACTIVE<br>
-                CONTAINMENT: 100%
+            <!-- LEFT TELEMETRY WIDGETS (Matching photo visual elements) -->
+            <div class="left-widget-panel">
+                <div class="widget-box">
+                    <div class="widget-title">AUDIO SYSTEM</div>
+                    <div class="widget-body">Too Many Nights</div>
+                    <div class="widget-sub">feat. Don Toliver...</div>
+                </div>
+
+                <div class="widget-box">
+                    <div class="widget-title">SYSTEM METRICS</div>
+                    <div class="widget-body">CPU: 24% | RAM: 58%</div>
+                    <div class="widget-sub">CORE TEMP: 48°C</div>
+                </div>
+
+                <div class="widget-box">
+                    <div class="widget-title">LINK STATUS</div>
+                    <div class="widget-body">QUANTUM ENCRYPTION</div>
+                    <div class="widget-sub">PING: 2ms // SECURE</div>
+                </div>
             </div>
-            <div class="hud-bottom-left">
-                <div class="label">CORE INTEGRITY</div>
-                <div class="value">89.18°C</div>
-                <div class="status">CONTAINMENT STABLE // ONLINE</div>
-            </div>
-            <div class="hud-bottom-right">
-                CORE SCALE: {core_scale}x<br>
-                ORBITAL DENSITY: {ring_density} L<br>
-                PARTICLE FLUX: {particle_count} P
+
+            <!-- CENTER STATUS DISPLAY -->
+            <div class="center-status-badge">
+                <div class="status-tag">
+                    <div class="status-dot"></div>
+                    ACTIVE
+                </div>
+                <div class="status-subtext">J.A.R.V.I.S. is online. Click status to disconnect.</div>
             </div>
         </div>
 
         <script>
-            const canvas = document.getElementById('jarvisCanvas');
+            const canvas = document.getElementById('hudCanvas');
             const ctx = canvas.getContext('2d');
 
             let width, height;
@@ -405,176 +465,142 @@ with tab_ember:
             resize();
             window.addEventListener('resize', resize);
 
-            const scale = {core_scale};
-            const rings = {ring_density};
-            const numParticles = {particle_count};
-            const primaryColor = "{active_theme["primary"]}";
-            const secondaryColor = "{active_theme["secondary"]}";
+            const primary = "{active_colors["primary"]}";
+            const secondary = "{active_colors["secondary"]}";
+            const baseScale = {core_scale};
+            const speed = {rot_speed};
 
-            let rotationY = 0;
-            let mouseX = 0, mouseY = 0;
+            let angle = 0;
+            let waveOffset = 0;
 
-            window.addEventListener('mousemove', (e) => {{
-                const rect = canvas.getBoundingClientRect();
-                mouseX = (e.clientX - rect.left - width / 2) * 0.0005;
-                mouseY = (e.clientY - rect.top - height / 2) * 0.0005;
-            }});
-
-            // Particle Swarm Class
-            class Particle {{
-                constructor() {{
-                    this.reset();
-                }}
-                reset() {{
-                    this.theta = Math.random() * Math.PI * 2;
-                    this.phi = Math.acos((Math.random() * 2) - 1);
-                    this.radius = (100 + Math.random() * 140) * scale;
-                    this.speed = (0.003 + Math.random() * 0.01) * (Math.random() < 0.5 ? 1 : -1);
-                    this.size = Math.random() * 2.2 + 0.8;
-                }}
-                update() {{
-                    this.theta += this.speed;
-                }}
-                draw(centerX, centerY) {{
-                    const x = this.radius * Math.sin(this.phi) * Math.cos(this.theta + rotationY);
-                    const y = this.radius * Math.cos(this.phi);
-                    const z = this.radius * Math.sin(this.phi) * Math.sin(this.theta + rotationY);
-
-                    const perspective = 400 / (400 + z);
-                    const px = centerX + x * perspective;
-                    const py = centerY + y * perspective;
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(px, py, this.size * perspective, 0, Math.PI * 2);
-                    ctx.fillStyle = z > 0 ? primaryColor : secondaryColor;
-                    ctx.globalAlpha = Math.max(0.15, (z + this.radius) / (2 * this.radius));
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = primaryColor;
-                    ctx.fill();
-                    ctx.restore();
-                }}
-            }}
-
-            const particles = Array.from({{ length: numParticles }}, () => new Particle());
-
-            function draw() {{
-                ctx.clearRect(0, 0, width, height);
-                const centerX = width / 2;
-                const centerY = height / 2;
-
-                rotationY += 0.008 + mouseX;
-
-                // --- 1. HUD TARGET GRID & RETICLES ---
+            function drawJARVISRing(cx, cy, radius) {{
                 ctx.save();
-                ctx.strokeStyle = primaryColor;
-                ctx.globalAlpha = 0.2;
-                ctx.lineWidth = 1;
+                ctx.translate(cx, cy);
 
-                // Concentric HUD Circles
-                for (let r = 80; r <= 280; r += 60) {{
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, r * scale, 0, Math.PI * 2);
-                    ctx.stroke();
-                }}
-
-                // Radial Tick Lines
-                for (let a = 0; a < Math.PI * 2; a += Math.PI / 12) {{
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + Math.cos(a) * 70 * scale, centerY + Math.sin(a) * 70 * scale);
-                    ctx.lineTo(centerX + Math.cos(a) * 280 * scale, centerY + Math.sin(a) * 280 * scale);
-                    ctx.stroke();
-                }}
-                ctx.restore();
-
-                // --- 2. RADIATING LIGHT RAYS / BURST SPIKES ---
-                ctx.save();
-                ctx.strokeStyle = secondaryColor;
+                // --- 1. OUTERMOST THIN GLOW RING ---
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 1.35, 0, Math.PI * 2);
+                ctx.strokeStyle = primary;
+                ctx.globalAlpha = 0.3;
                 ctx.lineWidth = 1.5;
-                ctx.globalAlpha = 0.45;
-                const rayCount = 16;
-                for (let i = 0; i < rayCount; i++) {{
-                    const rayAngle = (i * Math.PI * 2 / rayCount) + rotationY * 0.5;
-                    const innerR = 30 * scale;
-                    const outerR = (180 + Math.sin(rotationY * 3 + i) * 40) * scale;
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + Math.cos(rayAngle) * innerR, centerY + Math.sin(rayAngle) * innerR);
-                    ctx.lineTo(centerX + Math.cos(rayAngle) * outerR, centerY + Math.sin(rayAngle) * outerR);
-                    ctx.stroke();
-                }}
-                ctx.restore();
+                ctx.stroke();
 
-                // --- 3. 3D ROTATING ORBITAL RINGS ---
-                for (let i = 0; i < rings; i++) {{
-                    ctx.save();
-                    ctx.translate(centerX, centerY);
-                    
-                    const tiltX = (i * Math.PI / rings) + mouseY;
-                    const tiltY = rotationY * (i % 2 === 0 ? 1 : -1);
-                    
-                    ctx.rotate(tiltX);
-                    ctx.rotate(tiltY);
-
-                    ctx.beginPath();
-                    const rx = (110 + i * 18) * scale;
-                    const ry = (40 + i * 12) * scale;
-                    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-                    
-                    ctx.strokeStyle = i % 2 === 0 ? primaryColor : secondaryColor;
-                    ctx.globalAlpha = 0.6 + (i * 0.04);
-                    ctx.lineWidth = 2.0;
-                    ctx.shadowBlur = 12;
-                    ctx.shadowColor = primaryColor;
-                    ctx.stroke();
-                    ctx.restore();
-                }}
-
-                // --- 4. PARTICLE SWARM SHELL ---
-                particles.forEach(p => {{
-                    p.update();
-                    p.draw(centerX, centerY);
-                }});
-
-                // --- 5. GLOWING ARC REACTOR CORE ---
+                // --- 2. SEGMENTED DASHED RING ---
                 ctx.save();
-                const coreRadius = 40 * scale;
-
-                // Outer Atmosphere Glow
+                ctx.rotate(angle * 0.4);
                 ctx.beginPath();
-                ctx.arc(centerX, centerY, coreRadius + 30, 0, Math.PI * 2);
-                const glowGradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, coreRadius + 40);
-                glowGradient.addColorStop(0, '#ffffff');
-                glowGradient.addColorStop(0.3, secondaryColor);
-                glowGradient.addColorStop(0.7, primaryColor);
-                glowGradient.addColorStop(1, 'transparent');
-                ctx.fillStyle = glowGradient;
-                ctx.globalAlpha = 0.85;
-                ctx.fill();
-
-                // Solid Core Center
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2);
-                ctx.fillStyle = "#ffffff";
-                ctx.shadowBlur = 40;
-                ctx.shadowColor = primaryColor;
-                ctx.fill();
+                ctx.arc(0, 0, radius * 1.22, 0, Math.PI * 2);
+                ctx.strokeStyle = primary;
+                ctx.globalAlpha = 0.8;
+                ctx.lineWidth = 4;
+                ctx.setLineDash([12, 18, 4, 18]);
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = primary;
+                ctx.stroke();
                 ctx.restore();
 
-                requestAnimationFrame(draw);
+                // --- 3. INNER RADIAL TICK MARKS (Identical to J.A.R.V.I.S image) ---
+                ctx.save();
+                ctx.rotate(-angle * 0.6);
+                const ticks = 60;
+                for (let i = 0; i < ticks; i++) {{
+                    const a = (i * Math.PI * 2) / ticks;
+                    const innerR = radius * 0.92;
+                    const outerR = (i % 5 === 0) ? radius * 1.08 : radius * 1.02;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(a) * innerR, Math.sin(a) * innerR);
+                    ctx.lineTo(Math.cos(a) * outerR, Math.sin(a) * outerR);
+                    ctx.strokeStyle = (i % 5 === 0) ? primary : secondary;
+                    ctx.lineWidth = (i % 5 === 0) ? 2.5 : 1;
+                    ctx.globalAlpha = (i % 5 === 0) ? 0.9 : 0.4;
+                    ctx.stroke();
+                }}
+                ctx.restore();
+
+                // --- 4. SOLID INNER DOUBLE RINGS ---
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
+                ctx.strokeStyle = primary;
+                ctx.lineWidth = 3;
+                ctx.globalAlpha = 0.95;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = primary;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.82, 0, Math.PI * 2);
+                ctx.strokeStyle = secondary;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.5;
+                ctx.stroke();
+
+                // --- 5. CENTER "J.A.R.V.I.S." TEXT ---
+                ctx.font = `900 ${{Math.round(26 * baseScale)}}px 'Segoe UI', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = primary;
+                ctx.fillText('J.A.R.V.I.S.', 0, 0);
+
+                ctx.restore();
             }}
 
-            draw();
+            // Draw Bottom Left Oscilloscope Waveform from image
+            function drawWaveform() {{
+                ctx.save();
+                ctx.beginPath();
+                const startX = 35;
+                const startY = height - 70;
+                const waveWidth = 180;
+
+                ctx.moveTo(startX, startY);
+                for (let x = 0; x < waveWidth; x += 4) {{
+                    const y = startY + Math.sin((x * 0.1) + waveOffset) * 12 * Math.cos((x * 0.05) + waveOffset);
+                    ctx.lineTo(startX + x, y);
+                }}
+
+                ctx.strokeStyle = primary;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = primary;
+                ctx.globalAlpha = 0.8;
+                ctx.stroke();
+                ctx.restore();
+            }}
+
+            function render() {{
+                ctx.clearRect(0, 0, width, height);
+
+                angle += 0.01 * speed;
+                waveOffset += 0.08;
+
+                const centerX = width / 2;
+                const centerY = height / 2 - 20;
+                const radius = 110 * baseScale;
+
+                // Center Hologram Core Ring
+                drawJARVISRing(centerX, centerY, radius);
+
+                // Waveform graph at bottom left
+                drawWaveform();
+
+                requestAnimationFrame(render);
+            }}
+
+            render();
         </script>
     </body>
     </html>
     """
 
-    components.html(jarvis_canvas_html, height=620)
+    components.html(transparent_hud_html, height=640)
 
     # Telemetry metrics
     st.markdown("### ⚙️ JARVIS System Diagnostics")
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Core Temperature", "89.18 °C", "-0.4°C")
-    m2.metric("Magnetic Shield", "4.8 Tesla", "100% Nominal")
-    m3.metric("Neural Sync", "99.98%", "+0.02%")
+    m1.metric("Core Temperature", "48.00 °C", "-0.2°C")
+    m2.metric("Neural Link", "99.98%", "+0.01%")
+    m3.metric("Quantum Sync", "4.8 GHz", "Nominal")
     m4.metric("Reactor Output", "1.21 GW", "Stable")
