@@ -1,184 +1,14 @@
 import os
 import json
-import base64
 import streamlit as st
+import streamlit.components.v1 as components
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
 from datetime import datetime
 
 # Page Setup
-st.set_page_config(page_title="Noir -Eclipse AI", page_icon="⚡", layout="centered")
-
-# --- INTERACTIVE EMBER CORE HTML/JS GENERATOR ---
-HTML_EMBER_CORE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noir -Eclipse // Interactive Energy Core</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }
-        body { background: #030712; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
-        .ui-overlay {
-            position: absolute; top: 20px; left: 20px; pointer-events: none;
-            background: rgba(3, 7, 18, 0.6); padding: 15px 25px; border-radius: 12px;
-            border: 1px solid rgba(0, 242, 254, 0.2); backdrop-filter: blur(10px);
-        }
-        .title { font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe; }
-        .subtitle { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
-    </style>
-</head>
-<body>
-    <div class="ui-overlay">
-        <div class="title">⚡ NOIR -ECLIPSE CORE</div>
-        <div class="subtitle">Move cursor to distort magnetic field • Click to discharge shockwave</div>
-    </div>
-    <canvas id="coreCanvas"></canvas>
-
-    <script>
-        const canvas = document.getElementById('coreCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        const mouse = { x: width / 2, y: height / 2, active: false };
-        let shockwaves = [];
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-            mouse.active = true;
-        });
-
-        window.addEventListener('click', (e) => {
-            shockwaves.push({
-                x: e.clientX,
-                y: e.clientY,
-                radius: 10,
-                maxRadius: 250,
-                alpha: 1
-            });
-        });
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.angle = Math.random() * Math.PI * 2;
-                this.distance = 40 + Math.random() * 180;
-                this.speed = (0.005 + Math.random() * 0.02) * (Math.random() < 0.5 ? 1 : -1);
-                this.size = Math.random() * 3 + 1;
-                this.color = Math.random() > 0.3 ? '#00f2fe' : '#ff4b4b';
-                this.alpha = Math.random() * 0.8 + 0.2;
-            }
-
-            update(centerX, centerY) {
-                this.angle += this.speed;
-                
-                let targetX = centerX + Math.cos(this.angle) * this.distance;
-                let targetY = centerY + Math.sin(this.angle) * this.distance;
-
-                if (mouse.active) {
-                    const dx = mouse.x - targetX;
-                    const dy = mouse.y - targetY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 200) {
-                        targetX += (dx / dist) * 30;
-                        targetY += (dy / dist) * 30;
-                    }
-                }
-
-                this.x = targetX;
-                this.y = targetY;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        const particles = Array.from({ length: 180 }, () => new Particle());
-
-        function animate() {
-            ctx.fillStyle = 'rgba(3, 7, 18, 0.2)';
-            ctx.fillRect(0, 0, width, height);
-
-            const centerX = width / 2;
-            const centerY = height / 2;
-
-            // Draw Core Energy Pulse
-            const time = Date.now() * 0.003;
-            const corePulse = Math.sin(time) * 8 + 45;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, corePulse, 0, Math.PI * 2);
-            const gradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, corePulse + 30);
-            gradient.addColorStop(0, '#ffffff');
-            gradient.addColorStop(0.4, '#00f2fe');
-            gradient.addColorStop(0.8, '#ff007f');
-            gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient;
-            ctx.shadowBlur = 40;
-            ctx.shadowColor = '#00f2fe';
-            ctx.fill();
-            ctx.restore();
-
-            // Update & Draw Particles
-            particles.forEach(p => {
-                p.update(centerX, centerY);
-                p.draw();
-            });
-
-            // Shockwaves
-            shockwaves.forEach((sw, index) => {
-                sw.radius += 8;
-                sw.alpha -= 0.02;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(0, 242, 254, ${sw.alpha})`;
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#00f2fe';
-                ctx.stroke();
-                ctx.restore();
-
-                if (sw.alpha <= 0) shockwaves.splice(index, 1);
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        animate();
-    </script>
-</body>
-</html>
-"""
-
-# Convert HTML string to Base64 Data URI
-b64_core = base64.b64encode(HTML_EMBER_CORE.encode('utf-8')).decode('utf-8')
-data_url_core = f"data:text/html;base64,{b64_core}"
+st.set_page_config(page_title="Noir -Eclipse AI", page_icon="⚡", layout="wide")
 
 # --- SAFE API KEY LOADING ---
 env_path = Path(__file__).parent / ".env"
@@ -204,37 +34,15 @@ def resolve_groq_model(choice: str, prompt_text: str) -> tuple[str, str]:
         return "llama-3.3-70b-versatile", "🛡️ Groq Llama 3.3 (70B)"
     return "llama-3.1-8b-instant", "⚡ Groq Llama 3.1 (8B)"
 
-# --- INTERACTIVE ENERGY CORE BRAIN (HEADER) ---
-st.markdown("""
-    <style>
-    .core-container { display: flex; justify-content: center; align-items: center; margin: 5px 0; }
-    .energy-core {
-        width: 85px; height: 85px; border-radius: 50%;
-        background: radial-gradient(circle, #00f2fe 0%, #4facfe 50%, #000 100%);
-        box-shadow: 0 0 20px #00f2fe, 0 0 40px #4facfe;
-        animation: pulse 2s infinite ease-in-out;
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.92); box-shadow: 0 0 15px #00f2fe; }
-        50% { transform: scale(1.08); box-shadow: 0 0 30px #00f2fe, 0 0 50px #4facfe; }
-        100% { transform: scale(0.92); box-shadow: 0 0 15px #00f2fe; }
-    }
-    .core-launch-btn {
-        display: block; width: 100%; text-align: center; padding: 10px;
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-        color: #030712 !important; font-weight: 700; border-radius: 8px;
-        text-decoration: none; box-shadow: 0 0 15px rgba(0,242,254,0.4);
-        margin-bottom: 15px; transition: all 0.3s ease;
-    }
-    .core-launch-btn:hover {
-        box-shadow: 0 0 25px rgba(0,242,254,0.8); transform: translateY(-2px);
-    }
-    </style>
-    <div class="core-container"><div class="energy-core"></div></div>
-""", unsafe_allow_html=True)
+# --- AUTOMATIC SESSION INITIALIZATION ---
+if "chat_library" not in st.session_state:
+    st.session_state.chat_library = {}
 
-st.title("⚡ Noir -Eclipse")
+if "current_chat_id" not in st.session_state:
+    st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
+    st.session_state.messages = []
 
+# --- SYSTEM PROMPT HELPER ---
 def get_system_prompt(target_lang: str) -> str:
     instructions = (
         "You are Noir -Eclipse, an advanced Personal AI Assistant. "
@@ -246,21 +54,12 @@ def get_system_prompt(target_lang: str) -> str:
         instructions += " Always respond in English."
     return instructions
 
-# --- AUTOMATIC SESSION INITIALIZATION ---
-if "chat_library" not in st.session_state:
-    st.session_state.chat_library = {}
-
-if "current_chat_id" not in st.session_state:
-    st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
-    st.session_state.messages = []
-
-# --- SIDEBAR: SETTINGS & AUTOMATED LIBRARY ---
+# --- SIDEBAR: SETTINGS & LIBRARY ---
 with st.sidebar:
-    # --- LAUNCH INTERACTIVE CORE BUTTON ---
-    st.markdown(f'<a href="{data_url_core}" target="_blank" class="core-launch-btn">🔥 Launch Interactive Core (New Tab)</a>', unsafe_allow_html=True)
+    st.title("⚡ Noir -Eclipse OS")
+    st.caption("GENESIS - PERSONAL AI OS")
     
     st.header("⚙️ Settings")
-    
     model_choice = st.selectbox(
         "Choose Groq Model",
         ["⚡ Dynamic Auto-Router", "Llama 3.3 70B (High Intelligence)", "Llama 3.1 8B (Fast Response)"]
@@ -311,57 +110,241 @@ with st.sidebar:
             use_container_width=True
         )
 
-# System prompt binding
-sys_prompt = get_system_prompt(target_lang)
-if len(st.session_state.messages) == 0:
-    st.session_state.messages = [{"role": "system", "content": sys_prompt}]
-else:
-    st.session_state.messages[0] = {"role": "system", "content": sys_prompt}
+# --- MAIN NAVIGATION TABS IN WEBSITE ---
+tab_console, tab_ember = st.tabs(["💬 AI Console", "🔥 Ember Core"])
 
-# Display Active Chat History
-for msg in st.session_state.messages:
-    if msg["role"] != "system":
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+# ==========================================
+# TAB 1: AI CONSOLE
+# ==========================================
+with tab_console:
+    st.title("💬 Assistant Console")
+    
+    sys_prompt = get_system_prompt(target_lang)
+    if len(st.session_state.messages) == 0:
+        st.session_state.messages = [{"role": "system", "content": sys_prompt}]
+    else:
+        st.session_state.messages[0] = {"role": "system", "content": sys_prompt}
 
-# Voice & Text Inputs
-st.write("---")
-audio_file = st.audio_input("🎙️ Voice Command")
-prompt = None
+    # Display Chat History
+    for msg in st.session_state.messages:
+        if msg["role"] != "system":
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
 
-if audio_file:
-    transcription = client.audio.transcriptions.create(
-        file=(audio_file.name, audio_file.getvalue()),
-        model="whisper-large-v3"
-    )
-    prompt = transcription.text
+    st.write("---")
+    audio_file = st.audio_input("🎙️ Voice Command")
+    prompt = None
 
-text_prompt = st.chat_input("Ask Noir -Eclipse anything...")
-if text_prompt:
-    prompt = text_prompt
-
-# Process User Query
-if prompt:
-    if len(st.session_state.messages) == 1:
-        st.session_state.current_chat_id = f"{prompt[:18]}... ({datetime.now().strftime('%H:%M')})"
-
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    model_id, model_description = resolve_groq_model(model_choice, prompt)
-    cleaned_messages = [{"role": m["role"], "content": str(m["content"])} for m in st.session_state.messages]
-
-    with st.chat_message("assistant"):
-        st.caption(f"Engine: `{model_id}` | {model_description}")
-        response = client.chat.completions.create(
-            model=model_id,
-            messages=cleaned_messages,
-            temperature=0.6,
+    if audio_file:
+        transcription = client.audio.transcriptions.create(
+            file=(audio_file.name, audio_file.getvalue()),
+            model="whisper-large-v3"
         )
-        ai_reply = response.choices[0].message.content
-        st.write(ai_reply)
-        st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+        prompt = transcription.text
 
-    # Auto-save after response
-    st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
+    text_prompt = st.chat_input("Ask Noir -Eclipse anything...")
+    if text_prompt:
+        prompt = text_prompt
+
+    if prompt:
+        if len(st.session_state.messages) == 1:
+            st.session_state.current_chat_id = f"{prompt[:18]}... ({datetime.now().strftime('%H:%M')})"
+
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
+
+        model_id, model_description = resolve_groq_model(model_choice, prompt)
+        cleaned_messages = [{"role": m["role"], "content": str(m["content"])} for m in st.session_state.messages]
+
+        with st.chat_message("assistant"):
+            st.caption(f"Engine: `{model_id}` | {model_description}")
+            response = client.chat.completions.create(
+                model=model_id,
+                messages=cleaned_messages,
+                temperature=0.6,
+            )
+            ai_reply = response.choices[0].message.content
+            st.write(ai_reply)
+            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+
+        st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
+
+# ==========================================
+# TAB 2: EMBER CORE (VISUAL CONTAINMENT INTERFACE)
+# ==========================================
+with tab_ember:
+    st.caption("PERSONAL VISUAL INTERFACE")
+    st.title("Ember Core")
+    st.markdown("A live, editable containment visualizer. Its field expands while you speak and settles back into containment when the room is quiet.")
+
+    # Control Parameters (Aspects)
+    col_aspect1, col_aspect2, col_aspect3, col_aspect4 = st.columns(4)
+    
+    with col_aspect1:
+        core_scale = st.slider("CORE SCALE", min_value=0.5, max_value=2.0, value=1.0, step=0.1)
+    with col_aspect2:
+        ring_density = st.slider("RING DENSITY", min_value=1, max_value=6, value=3, step=1)
+    with col_aspect3:
+        energy_profile = st.selectbox("ENERGY PROFILE", ["Amber Flame", "Plasma Core", "Quantum Void", "Overdrive"])
+    with col_aspect4:
+        core_status = st.selectbox("CONTAINMENT MODE", ["ONLINE", "STANDBY", "CONTAINMENT LOCK", "OVERLOAD"])
+
+    # Color mapping for Energy Profile
+    color_map = {
+        "Amber Flame": {"primary": "#ff5500", "secondary": "#ffaa00", "glow": "rgba(255, 85, 0, 0.8)"},
+        "Plasma Core": {"primary": "#00f2fe", "secondary": "#4facfe", "glow": "rgba(0, 242, 254, 0.8)"},
+        "Quantum Void": {"primary": "#a855f7", "secondary": "#ec4899", "glow": "rgba(168, 85, 247, 0.8)"},
+        "Overdrive": {"primary": "#ef4444", "secondary": "#f97316", "glow": "rgba(239, 68, 68, 0.9)"}
+    }
+    theme = color_map[energy_profile]
+
+    # Dynamic HTML/Canvas Ember Visualizer
+    ember_canvas_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; background: transparent; overflow: hidden; }}
+            body {{
+                background: #090a0f;
+                font-family: 'Courier New', Courier, monospace;
+                color: #e2e8f0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 500px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                position: relative;
+            }}
+            #container {{ position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }}
+            canvas {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; }}
+            
+            .hud-top-right {{
+                position: absolute; top: 15px; right: 20px;
+                font-size: 11px; letter-spacing: 2px; color: rgba(255, 255, 255, 0.4);
+                text-transform: uppercase;
+            }}
+            .hud-bottom-left {{
+                position: absolute; bottom: 20px; left: 25px;
+            }}
+            .hud-bottom-left .title {{ font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; }}
+            .hud-bottom-left .value {{ font-size: 28px; font-weight: bold; color: #ffffff; margin: 2px 0; }}
+            .hud-bottom-left .sub {{ font-size: 11px; color: {theme["primary"]}; letter-spacing: 1px; font-weight: 600; }}
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="emberCanvas"></canvas>
+            <div class="hud-top-right">E M B E R • C O N T A I N M E N T • I N T E R F A C E</div>
+            <div class="hud-bottom-left">
+                <div class="title">CORE INTEGRITY</div>
+                <div class="value">100%</div>
+                <div class="sub">{core_status} - CONTAINMENT STABLE</div>
+            </div>
+        </div>
+
+        <script>
+            const canvas = document.getElementById('emberCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width, height;
+            function resize() {{
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+            }}
+            resize();
+            window.addEventListener('resize', resize);
+
+            const scale = {core_scale};
+            const ringsCount = {ring_density};
+            const primaryColor = "{theme["primary"]}";
+            const secondaryColor = "{theme["secondary"]}";
+            const statusText = "{core_status}";
+
+            let angleOffset = 0;
+
+            function draw() {{
+                ctx.clearRect(0, 0, width, height);
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                angleOffset += 0.015;
+
+                // --- 1. Draw Outer Orbital Containment Rings ---
+                for (let i = 0; i < ringsCount; i++) {{
+                    ctx.save();
+                    ctx.translate(centerX, centerY);
+                    
+                    const ringAngle = angleOffset * (i % 2 === 0 ? 1 : -1) + (i * Math.PI / ringsCount);
+                    ctx.rotate(ringAngle);
+                    
+                    ctx.beginPath();
+                    const rx = (120 + i * 25) * scale;
+                    const ry = (35 + i * 12) * scale;
+                    ctx.ellipse(0, 0, rx, ry, i * 0.4, 0, Math.PI * 2);
+                    ctx.strokeStyle = i === 0 ? primaryColor : secondaryColor;
+                    ctx.globalAlpha = 0.4 + (i * 0.1);
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.restore();
+                }}
+
+                // --- 2. Draw Ember Core Glow ---
+                const coreRadius = 45 * scale;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, coreRadius + 20, 0, Math.PI * 2);
+                const outerGlow = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, coreRadius + 35);
+                outerGlow.addColorStop(0, primaryColor);
+                outerGlow.addColorStop(0.6, secondaryColor);
+                outerGlow.addColorStop(1, 'transparent');
+                ctx.fillStyle = outerGlow;
+                ctx.globalAlpha = 0.8;
+                ctx.fill();
+
+                // Core Sphere
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2);
+                const innerCore = ctx.createRadialGradient(centerX - 10, centerY - 10, 2, centerX, centerY, coreRadius);
+                innerCore.addColorStop(0, '#ffffff');
+                innerCore.addColorStop(0.3, secondaryColor);
+                innerCore.addColorStop(1, primaryColor);
+                ctx.fillStyle = innerCore;
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = primaryColor;
+                ctx.fill();
+                ctx.restore();
+
+                // --- 3. Center Status Text ---
+                ctx.save();
+                ctx.font = "900 11px Arial, sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.letterSpacing = "2px";
+                ctx.fillText(statusText, centerX, centerY);
+                ctx.restore();
+
+                requestAnimationFrame(draw);
+            }}
+
+            draw();
+        </script>
+    </body>
+    </html>
+    """
+
+    # Embed HTML Visualizer directly inside Streamlit Tab
+    components.html(ember_canvas_html, height=520)
+
+    # Telemetry and Quick Actions
+    st.subheader("⚙️ Aspect Control Metrics")
+    m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+    m_col1.metric("Thermal Energy Output", "485 K", "+2.4%")
+    m_col2.metric("Magnetic Field Flux", "1.24 Tesla", "Nominal")
+    m_col3.metric("Containment Stability", "99.8%", "Stable")
+    m_col4.metric("Voice Sensitivity", "Active", "Listening")
