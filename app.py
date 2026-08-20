@@ -10,23 +10,23 @@ from datetime import datetime
 # Page Setup
 st.set_page_config(page_title="Noir -Eclipse OS", page_icon="⚡", layout="wide")
 
-# Inject Custom Cyberpunk / Vibrant Neon Styling
+# Inject Custom High-Tech Blue & Cyan Cyber Styling (No Pink/Purple)
 st.markdown("""
 <style>
-    /* Main Background Gradient */
+    /* Main Background Gradient - Deep Oceanic Charcoal */
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #1a0b2e 0%, #080311 50%, #020106 100%);
+        background: radial-gradient(circle at 50% 10%, #031326 0%, #050e1a 50%, #02070d 100%);
         color: #e2e8f0;
     }
     
-    /* Vibrant Gradient Title & Subtitle Header */
+    /* Vibrant Cyan & Electric Blue Gradient Header */
     .glow-title {
         font-size: 2.8rem;
         font-weight: 900;
-        background: linear-gradient(135deg, #ff007f, #9d4edd, #00f2fe);
+        background: linear-gradient(135deg, #00f2fe, #0072ff, #3b82f6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
+        text-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
         margin-bottom: 0.1rem;
     }
 
@@ -40,29 +40,29 @@ st.markdown("""
         text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
     }
 
-    /* Sidebar Glassmorphism & Glowing Borders */
+    /* Sidebar Glassmorphism & Glowing Cyan Borders */
     [data-testid="stSidebar"] {
-        background: rgba(15, 10, 28, 0.85) !important;
-        border-right: 1px solid rgba(255, 0, 127, 0.3) !important;
-        box-shadow: 5px 0 25px rgba(255, 0, 127, 0.15) !important;
+        background: rgba(8, 20, 36, 0.85) !important;
+        border-right: 1px solid rgba(0, 242, 254, 0.3) !important;
+        box-shadow: 5px 0 25px rgba(0, 242, 254, 0.15) !important;
     }
 
-    /* Custom Colorful Neon Buttons */
+    /* Custom Electric Cyan & Blue Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #ff007f, #7928ca) !important;
+        background: linear-gradient(135deg, #0072ff, #00f2fe) !important;
         color: #ffffff !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
         letter-spacing: 1px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4) !important;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3) !important;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6) !important;
-        background: linear-gradient(135deg, #7928ca, #00f2fe) !important;
+        background: linear-gradient(135deg, #00f2fe, #3b82f6) !important;
     }
 
     /* Tab Navigation Header Styling */
@@ -84,16 +84,16 @@ st.markdown("""
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(255, 0, 127, 0.25), rgba(0, 242, 254, 0.25)) !important;
+        background: linear-gradient(135deg, rgba(0, 114, 255, 0.25), rgba(0, 242, 254, 0.25)) !important;
         color: #ffffff !important;
         border-bottom: 3px solid #00f2fe !important;
-        border-top: 1px solid rgba(255, 0, 127, 0.5) !important;
+        border-top: 1px solid rgba(0, 242, 254, 0.5) !important;
         box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
     }
 
-    /* Colorful Metrics Card Containers */
+    /* Cyan Metrics Card Containers */
     [data-testid="stMetric"] {
-        background: rgba(24, 15, 42, 0.7);
+        background: rgba(10, 25, 45, 0.7);
         border: 1px solid rgba(0, 242, 254, 0.3);
         padding: 15px;
         border-radius: 12px;
@@ -102,22 +102,22 @@ st.markdown("""
     }
     
     [data-testid="stMetricLabel"] {
-        color: #ff007f !important;
+        color: #00f2fe !important;
         font-weight: 700 !important;
         letter-spacing: 1px;
     }
 
     [data-testid="stMetricValue"] {
-        color: #00f2fe !important;
+        color: #38bdf8 !important;
         font-weight: 900 !important;
-        text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+        text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
     }
 
     /* Glowing Select Boxes & Text Inputs */
     .stTextInput > div > div > input, .stSelectbox > div > div {
-        background: rgba(20, 12, 35, 0.8) !important;
+        background: rgba(10, 20, 35, 0.8) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(157, 78, 221, 0.5) !important;
+        border: 1px solid rgba(0, 242, 254, 0.4) !important;
         border-radius: 8px !important;
     }
 
@@ -128,8 +128,8 @@ st.markdown("""
 
     /* Chat Messages Glass Panel */
     [data-testid="stChatMessage"] {
-        background: rgba(25, 16, 45, 0.6) !important;
-        border: 1px solid rgba(255, 0, 127, 0.2);
+        background: rgba(10, 22, 40, 0.6) !important;
+        border: 1px solid rgba(0, 242, 254, 0.2);
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
@@ -313,12 +313,12 @@ with tab_ember:
     with c3:
         particle_count = st.slider("PARTICLE FLUX", 100, 500, 250, 50)
     with c4:
-        theme_choice = st.selectbox("HUD THEME", ["Neon Gold", "Cyan Cyberpunk", "Plasma Purple", "Red Alert"])
+        theme_choice = st.selectbox("HUD THEME", ["Cyan Cyberpunk", "Emerald Matrix", "Neon Gold", "Red Alert"])
 
     theme_presets = {
-        "Neon Gold": {"primary": "#ff7700", "secondary": "#ffcc00", "hud": "#ffaa00"},
         "Cyan Cyberpunk": {"primary": "#00f2fe", "secondary": "#4facfe", "hud": "#00f2fe"},
-        "Plasma Purple": {"primary": "#c084fc", "secondary": "#f472b6", "hud": "#e879f9"},
+        "Emerald Matrix": {"primary": "#10b981", "secondary": "#34d399", "hud": "#059669"},
+        "Neon Gold": {"primary": "#ffaa00", "secondary": "#ffd700", "hud": "#ffaa00"},
         "Red Alert": {"primary": "#f87171", "secondary": "#fb923c", "hud": "#ef4444"}
     }
     active_theme = theme_presets[theme_choice]
@@ -330,7 +330,7 @@ with tab_ember:
         <style>
             * {{ margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }}
             body {{
-                background: #06030e;
+                background: #030812;
                 font-family: 'Courier New', monospace;
                 color: #e2e8f0;
                 display: flex;
