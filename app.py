@@ -9,7 +9,7 @@ from groq import Groq
 from datetime import datetime
 
 # Page Setup
-st.set_page_config(page_title="Noir -Eclipse OS", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="Noir Eclipse OS", page_icon="⚡", layout="wide")
 
 # Inject Custom High-Tech Cyan Glassmorphism Styling
 st.markdown("""
@@ -168,7 +168,7 @@ if "todo_list" not in st.session_state:
     st.session_state.todo_list = ["System Diagnostic Check", "Review Neural Link Parameters"]
 
 def get_system_prompt(target_lang: str) -> str:
-    instructions = "You are Noir -Eclipse, an advanced Personal AI Assistant. Respond accurately and concisely."
+    instructions = "You are Noir Eclipse, an advanced Personal AI Assistant. Respond accurately and concisely."
     if target_lang != "English":
         instructions += f" Translate your final response into {target_lang}."
     return instructions
@@ -176,7 +176,7 @@ def get_system_prompt(target_lang: str) -> str:
 # --- SIDEBAR ---
 with st.sidebar:
     st.markdown('<div class="glow-title" style="font-size: 1.8rem;">⚡ NOIR</div>', unsafe_allow_html=True)
-    st.markdown('<div class="glow-subtitle">GENESIS AI OS</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">ECLIPSE OS</div>', unsafe_allow_html=True)
     
     st.header("⚙️ Settings")
     model_choice = st.selectbox("Groq Model", ["⚡ Dynamic Auto-Router", "Llama 3.3 70B (High Intelligence)", "Llama 3.1 8B (Fast Response)"])
@@ -206,8 +206,19 @@ with st.sidebar:
                 del st.session_state.chat_library[selected_archive]
                 st.rerun()
 
+    if len(st.session_state.messages) > 1:
+        st.subheader("📥 Export")
+        chat_json = json.dumps(st.session_state.messages, indent=2)
+        st.download_button(
+            label="Export JSON",
+            data=chat_json,
+            file_name=f"noir_eclipse_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            mime="application/json",
+            use_container_width=True
+        )
+
 # --- MAIN TABS ---
-tab_console, tab_ember, tab_widgets = st.tabs(["💬 AI Console", "🔥 JARVIS Core", "📊 Utility Dashboard"])
+tab_console, tab_widgets = st.tabs(["💬 AI Console", "📊 Utility Dashboard"])
 
 # ==========================================
 # TAB 1: AI CONSOLE
@@ -238,7 +249,7 @@ with tab_console:
         )
         prompt = transcription.text
 
-    text_prompt = st.chat_input("Ask Noir -Eclipse anything...")
+    text_prompt = st.chat_input("Ask Noir Eclipse anything...")
     if text_prompt:
         prompt = text_prompt
 
@@ -263,120 +274,7 @@ with tab_console:
         st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
 
 # ==========================================
-# TAB 2: JARVIS HUD
-# ==========================================
-with tab_ember:
-    st.markdown('<div class="glow-title">⚡ J.A.R.V.I.S. HUD Core</div>', unsafe_allow_html=True)
-    st.markdown('<div class="glow-subtitle">REAL-TIME HOLOGRAPHIC TRANSPARENT DISPLAY UI</div>', unsafe_allow_html=True)
-
-    c1, c2 = st.columns(2)
-    with c1:
-        core_scale = st.slider("RING RADIUS", 0.7, 1.5, 1.0, 0.05)
-    with c2:
-        rot_speed = st.slider("ROTATION SPEED", 0.5, 3.0, 1.2, 0.1)
-
-    transparent_hud_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            * {{ margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }}
-            body {{
-                background: #02060c;
-                font-family: 'Segoe UI', system-ui, sans-serif;
-                color: #e2e8f0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 520px;
-                border: 1px solid rgba(0, 242, 254, 0.25);
-                border-radius: 16px;
-                position: relative;
-                box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.15);
-            }}
-            canvas {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; }}
-            .status-badge {{
-                position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
-                display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 10;
-            }}
-            .status-tag {{ font-size: 12px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe; }}
-        </style>
-    </head>
-    <body>
-        <canvas id="hudCanvas"></canvas>
-        <div class="status-badge">
-            <div class="status-tag">⚡ CORE ACTIVE</div>
-            <div style="font-size: 9px; color: rgba(255, 255, 255, 0.4);">J.A.R.V.I.S. ONLINE // SYSTEM NOMINAL</div>
-        </div>
-        <script>
-            const canvas = document.getElementById('hudCanvas');
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            function resize() {{ width = canvas.width = canvas.offsetWidth; height = canvas.height = canvas.offsetHeight; }}
-            resize();
-            window.addEventListener('resize', resize);
-
-            let angle = 0;
-            function render() {{
-                ctx.clearRect(0, 0, width, height);
-                angle += 0.01 * {rot_speed};
-                const cx = width / 2, cy = height / 2 - 10, r = 100 * {core_scale};
-
-                ctx.save();
-                ctx.translate(cx, cy);
-
-                // Segmented Outer Ring
-                ctx.save();
-                ctx.rotate(angle);
-                ctx.beginPath();
-                ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
-                ctx.strokeStyle = '#00f2fe';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([12, 16, 4, 16]);
-                ctx.stroke();
-                ctx.restore();
-
-                // Inner Ticks
-                ctx.save();
-                ctx.rotate(-angle * 0.5);
-                for (let i = 0; i < 48; i++) {{
-                    const a = (i * Math.PI * 2) / 48;
-                    ctx.beginPath();
-                    ctx.moveTo(Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9);
-                    ctx.lineTo(Math.cos(a) * r * 1.05, Math.sin(a) * r * 1.05);
-                    ctx.strokeStyle = i % 4 === 0 ? '#00f2fe' : '#0072ff';
-                    ctx.lineWidth = i % 4 === 0 ? 2 : 1;
-                    ctx.stroke();
-                }}
-                ctx.restore();
-
-                // Solid Core Ring
-                ctx.beginPath();
-                ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-                ctx.strokeStyle = '#00f2fe';
-                ctx.lineWidth = 2.5;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#00f2fe';
-                ctx.stroke();
-
-                // Center Text
-                ctx.font = '900 22px sans-serif';
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText('J.A.R.V.I.S.', 0, 0);
-
-                ctx.restore();
-                requestAnimationFrame(render);
-            }}
-            render();
-        </script>
-    </body>
-    </html>
-    """
-    components.html(transparent_hud_html, height=540)
-
-# ==========================================
-# TAB 3: UTILITY WIDGETS DASHBOARD
+# TAB 2: UTILITY WIDGETS DASHBOARD
 # ==========================================
 with tab_widgets:
     st.markdown('<div class="glow-title">📊 OS Workspace & Widgets</div>', unsafe_allow_html=True)
