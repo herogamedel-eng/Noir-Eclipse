@@ -54,11 +54,26 @@ st.markdown("""
 
 st.title("⚡ Noir -Eclipse")
 
-# Session State Initialization
+# Helper function for system prompt
+def get_system_prompt(target_lang: str) -> str:
+    instructions = (
+        "You are Noir -Eclipse, an advanced Personal AI Assistant. "
+        "Assist with general tasks, answering questions accurately and concisely."
+    )
+    if target_lang != "None (Standard AI)":
+        instructions += f" Translate your final response into {target_lang}."
+    return instructions
+
+# --- AUTOMATIC SESSION INITIALIZATION ---
 if "chat_library" not in st.session_state:
     st.session_state.chat_library = {}
 
-# --- SIDEBAR: SETTINGS & LIBRARY ---
+# Start a fresh chat session whenever the site opens or reloads
+if "current_chat_id" not in st.session_state:
+    st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
+    st.session_state.messages = []
+
+# --- SIDEBAR: SETTINGS & AUTOMATED LIBRARY ---
 with st.sidebar:
     st.header("⚙️ Settings")
     
@@ -76,43 +91,35 @@ with st.sidebar:
     # --- SIDEBAR LIBRARY ---
     st.header("📚 Library")
 
-    # Start New Chat Button
+    # Button to force a new chat manually
     if st.button("➕ Start New Chat", use_container_width=True):
-        if "messages" in st.session_state and len(st.session_state.messages) > 1:
-            first_user_msg = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Chat")
-            chat_title = f"{first_user_msg[:18]}... ({datetime.now().strftime('%H:%M')})"
-            st.session_state.chat_library[chat_title] = st.session_state.messages.copy()
+        # Save active conversation if it contains user messages
+        if len(st.session_state.messages) > 1:
+            st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
         
+        # Reset to new session
+        st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
         st.session_state.messages = []
         st.rerun()
 
-    # Save Current Session
-    if st.button("💾 Save Session to Library", use_container_width=True):
-        if "messages" in st.session_state and len(st.session_state.messages) > 1:
-            first_msg = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Session")
-            title = f"{first_msg[:18]}... ({datetime.now().strftime('%H:%M - %b %d')})"
-            st.session_state.chat_library[title] = st.session_state.messages.copy()
-            st.success("Session saved!")
-        else:
-            st.warning("No active chat to save.")
-
-    # Saved Archives Selector
+    # Saved Archives List
     if st.session_state.chat_library:
-        st.subheader("🗂️ Saved Archives")
-        selected_archive = st.selectbox("Select Saved Session", list(st.session_state.chat_library.keys()))
+        st.subheader("🗂️ Auto-Saved Chats")
+        selected_archive = st.selectbox("Select Previous Session", list(st.session_state.chat_library.keys()))
         
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
             if st.button("📖 Load", use_container_width=True):
                 st.session_state.messages = st.session_state.chat_library[selected_archive].copy()
+                st.session_state.current_chat_id = selected_archive
                 st.rerun()
         with btn_col2:
             if st.button("🗑️ Delete", use_container_width=True):
                 del st.session_state.chat_library[selected_archive]
                 st.rerun()
 
-    # Export Session JSON
-    if "messages" in st.session_state and len(st.session_state.messages) > 1:
+    # Export active session
+    if len(st.session_state.messages) > 1:
         st.subheader("📥 Export")
         chat_json = json.dumps(st.session_state.messages, indent=2)
         st.download_button(
@@ -123,21 +130,12 @@ with st.sidebar:
             use_container_width=True
         )
 
-# Helper function for system prompt
-def get_system_prompt():
-    instructions = (
-        "You are Noir -Eclipse, an advanced Personal AI Assistant. "
-        "Assist with general tasks, answering questions accurately and concisely."
-    )
-    if target_lang != "None (Standard AI)":
-        instructions += f" Translate your final response into {target_lang}."
-    return instructions
-
-# Initialize system prompt & message history
-if "messages" not in st.session_state or len(st.session_state.messages) == 0:
-    st.session_state.messages = [{"role": "system", "content": get_system_prompt()}]
+# Initialize or update system prompt in active session
+sys_prompt = get_system_prompt(target_lang)
+if len(st.session_state.messages) == 0:
+    st.session_state.messages = [{"role": "system", "content": sys_prompt}]
 else:
-    st.session_state.messages[0] = {"role": "system", "content": get_system_prompt()}
+    st.session_state.messages[0] = {"role": "system", "content": sys_prompt}
 
 # Display Active Chat Messages
 for msg in st.session_state.messages:
@@ -163,6 +161,10 @@ if text_prompt:
 
 # Process User Query
 if prompt:
+    # Rename session title dynamically based on the first user message
+    if len(st.session_state.messages) == 1:
+        st.session_state.current_chat_id = f"{prompt[:18]}... ({datetime.now().strftime('%H:%M')})"
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
@@ -180,3 +182,6 @@ if prompt:
         ai_reply = response.choices[0].message.content
         st.write(ai_reply)
         st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+
+    # --- AUTO-SAVE AFTER EVERY RESPONSE ---
+    st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
