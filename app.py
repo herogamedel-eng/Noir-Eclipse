@@ -10,6 +10,132 @@ from datetime import datetime
 # Page Setup
 st.set_page_config(page_title="Noir -Eclipse OS", page_icon="⚡", layout="wide")
 
+# Inject Custom Cyberpunk / Vibrant Neon Styling
+st.markdown("""
+<style>
+    /* Main Background Gradient */
+    .stApp {
+        background: radial-gradient(circle at 50% 10%, #1a0b2e 0%, #080311 50%, #020106 100%);
+        color: #e2e8f0;
+    }
+    
+    /* Vibrant Gradient Title & Subtitle Header */
+    .glow-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff007f, #9d4edd, #00f2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
+        margin-bottom: 0.1rem;
+    }
+
+    .glow-subtitle {
+        color: #00f2fe;
+        font-size: 1rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+
+    /* Sidebar Glassmorphism & Glowing Borders */
+    [data-testid="stSidebar"] {
+        background: rgba(15, 10, 28, 0.85) !important;
+        border-right: 1px solid rgba(255, 0, 127, 0.3) !important;
+        box-shadow: 5px 0 25px rgba(255, 0, 127, 0.15) !important;
+    }
+
+    /* Custom Colorful Neon Buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #ff007f, #7928ca) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4) !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6) !important;
+        background: linear-gradient(135deg, #7928ca, #00f2fe) !important;
+    }
+
+    /* Tab Navigation Header Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background-color: transparent;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px 10px 0px 0px;
+        color: #a0aec0;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0px 24px;
+        transition: all 0.3s ease;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(255, 0, 127, 0.25), rgba(0, 242, 254, 0.25)) !important;
+        color: #ffffff !important;
+        border-bottom: 3px solid #00f2fe !important;
+        border-top: 1px solid rgba(255, 0, 127, 0.5) !important;
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    }
+
+    /* Colorful Metrics Card Containers */
+    [data-testid="stMetric"] {
+        background: rgba(24, 15, 42, 0.7);
+        border: 1px solid rgba(0, 242, 254, 0.3);
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #ff007f !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px;
+    }
+
+    [data-testid="stMetricValue"] {
+        color: #00f2fe !important;
+        font-weight: 900 !important;
+        text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+    }
+
+    /* Glowing Select Boxes & Text Inputs */
+    .stTextInput > div > div > input, .stSelectbox > div > div {
+        background: rgba(20, 12, 35, 0.8) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(157, 78, 221, 0.5) !important;
+        border-radius: 8px !important;
+    }
+
+    .stTextInput > div > div > input:focus {
+        border-color: #00f2fe !important;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.6) !important;
+    }
+
+    /* Chat Messages Glass Panel */
+    [data-testid="stChatMessage"] {
+        background: rgba(25, 16, 45, 0.6) !important;
+        border: 1px solid rgba(255, 0, 127, 0.2);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # --- SAFE API KEY LOADING ---
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -56,8 +182,8 @@ def get_system_prompt(target_lang: str) -> str:
 
 # --- SIDEBAR: SETTINGS & LIBRARY ---
 with st.sidebar:
-    st.title("⚡ Noir -Eclipse OS")
-    st.caption("GENESIS - PERSONAL AI OS")
+    st.markdown('<div class="glow-title" style="font-size: 2rem;">⚡ NOIR</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">GENESIS AI OS</div>', unsafe_allow_html=True)
     
     st.header("⚙️ Settings")
     model_choice = st.selectbox(
@@ -103,7 +229,7 @@ with st.sidebar:
         st.subheader("📥 Export")
         chat_json = json.dumps(st.session_state.messages, indent=2)
         st.download_button(
-            label="Export as JSON",
+            label="Export JSON",
             data=chat_json,
             file_name=f"noir_eclipse_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
             mime="application/json",
@@ -117,7 +243,8 @@ tab_console, tab_ember = st.tabs(["💬 AI Console", "🔥 Ember Core"])
 # TAB 1: AI CONSOLE
 # ==========================================
 with tab_console:
-    st.title("💬 Assistant Console")
+    st.markdown('<div class="glow-title">💬 Assistant Console</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">VOICE & TEXT INTERACTION ENGINE</div>', unsafe_allow_html=True)
     
     sys_prompt = get_system_prompt(target_lang)
     if len(st.session_state.messages) == 0:
@@ -174,11 +301,10 @@ with tab_console:
 # TAB 2: JARVIS HUD & EMBER CORE
 # ==========================================
 with tab_ember:
-    st.caption("PERSONAL VISUAL INTERFACE")
-    st.title("Ember Arc Reactor Core")
-    st.markdown("A live holographic visualizer featuring orbital particle shells, HUD telemetry, and dynamic containment controls.")
+    st.markdown('<div class="glow-title">🔥 Ember Arc Reactor</div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-subtitle">HOLOGRAPHIC JARVIS INTERFACE & TELEMETRY</div>', unsafe_allow_html=True)
 
-    # Core Aspects / Controls
+    # Core Aspect Controls
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         core_scale = st.slider("CORE SCALE", 0.5, 2.0, 1.1, 0.1)
@@ -187,13 +313,13 @@ with tab_ember:
     with c3:
         particle_count = st.slider("PARTICLE FLUX", 100, 500, 250, 50)
     with c4:
-        theme_choice = st.selectbox("HUD THEME", ["Ember Gold", "Cyan HUD", "Plasma Purple", "Red Alert"])
+        theme_choice = st.selectbox("HUD THEME", ["Neon Gold", "Cyan Cyberpunk", "Plasma Purple", "Red Alert"])
 
     theme_presets = {
-        "Ember Gold": {"primary": "#ff7700", "secondary": "#ffcc00", "bg_glow": "rgba(255, 119, 0, 0.15)"},
-        "Cyan HUD": {"primary": "#00f2fe", "secondary": "#4facfe", "bg_glow": "rgba(0, 242, 254, 0.15)"},
-        "Plasma Purple": {"primary": "#c084fc", "secondary": "#f472b6", "bg_glow": "rgba(192, 132, 252, 0.15)"},
-        "Red Alert": {"primary": "#f87171", "secondary": "#fb923c", "bg_glow": "rgba(248, 113, 113, 0.15)"}
+        "Neon Gold": {"primary": "#ff7700", "secondary": "#ffcc00", "hud": "#ffaa00"},
+        "Cyan Cyberpunk": {"primary": "#00f2fe", "secondary": "#4facfe", "hud": "#00f2fe"},
+        "Plasma Purple": {"primary": "#c084fc", "secondary": "#f472b6", "hud": "#e879f9"},
+        "Red Alert": {"primary": "#f87171", "secondary": "#fb923c", "hud": "#ef4444"}
     }
     active_theme = theme_presets[theme_choice]
 
@@ -204,16 +330,17 @@ with tab_ember:
         <style>
             * {{ margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }}
             body {{
-                background: #04060a;
+                background: #06030e;
                 font-family: 'Courier New', monospace;
                 color: #e2e8f0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 height: 600px;
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                border-radius: 12px;
+                border: 1px solid {active_theme["primary"]}55;
+                border-radius: 16px;
                 position: relative;
+                box-shadow: 0 0 35px {active_theme["primary"]}22;
                 user-select: none;
             }}
             #canvas-container {{ position: relative; width: 100%; height: 100%; cursor: crosshair; }}
@@ -222,24 +349,24 @@ with tab_ember:
             /* HUD Overlays */
             .hud-header {{
                 position: absolute; top: 20px; left: 25px;
-                font-size: 11px; letter-spacing: 2px; color: {active_theme["primary"]};
-                font-weight: bold; text-shadow: 0 0 8px {active_theme["primary"]};
+                font-size: 12px; letter-spacing: 2px; color: {active_theme["hud"]};
+                font-weight: bold; text-shadow: 0 0 10px {active_theme["hud"]};
             }}
             .hud-top-right {{
                 position: absolute; top: 20px; right: 25px;
-                font-size: 10px; letter-spacing: 2px; color: rgba(255, 255, 255, 0.5);
-                text-align: right;
+                font-size: 10px; letter-spacing: 2px; color: {active_theme["secondary"]};
+                text-align: right; text-shadow: 0 0 8px {active_theme["secondary"]};
             }}
             .hud-bottom-left {{
                 position: absolute; bottom: 25px; left: 25px;
             }}
-            .hud-bottom-left .label {{ font-size: 9px; color: rgba(255, 255, 255, 0.4); letter-spacing: 2px; }}
-            .hud-bottom-left .value {{ font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: 1px; }}
-            .hud-bottom-left .status {{ font-size: 11px; color: {active_theme["secondary"]}; letter-spacing: 1.5px; font-weight: bold; }}
+            .hud-bottom-left .label {{ font-size: 9px; color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; }}
+            .hud-bottom-left .value {{ font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-shadow: 0 0 15px {active_theme["primary"]}; }}
+            .hud-bottom-left .status {{ font-size: 11px; color: {active_theme["hud"]}; letter-spacing: 1.5px; font-weight: bold; }}
             
             .hud-bottom-right {{
                 position: absolute; bottom: 25px; right: 25px; text-align: right;
-                font-size: 10px; color: rgba(255, 255, 255, 0.4); letter-spacing: 1px;
+                font-size: 10px; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px;
             }}
         </style>
     </head>
@@ -303,7 +430,7 @@ with tab_ember:
                     this.phi = Math.acos((Math.random() * 2) - 1);
                     this.radius = (100 + Math.random() * 140) * scale;
                     this.speed = (0.003 + Math.random() * 0.01) * (Math.random() < 0.5 ? 1 : -1);
-                    this.size = Math.random() * 2 + 0.8;
+                    this.size = Math.random() * 2.2 + 0.8;
                 }}
                 update() {{
                     this.theta += this.speed;
@@ -321,7 +448,9 @@ with tab_ember:
                     ctx.beginPath();
                     ctx.arc(px, py, this.size * perspective, 0, Math.PI * 2);
                     ctx.fillStyle = z > 0 ? primaryColor : secondaryColor;
-                    ctx.globalAlpha = Math.max(0.1, (z + this.radius) / (2 * this.radius));
+                    ctx.globalAlpha = Math.max(0.15, (z + this.radius) / (2 * this.radius));
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = primaryColor;
                     ctx.fill();
                     ctx.restore();
                 }}
@@ -339,7 +468,7 @@ with tab_ember:
                 // --- 1. HUD TARGET GRID & RETICLES ---
                 ctx.save();
                 ctx.strokeStyle = primaryColor;
-                ctx.globalAlpha = 0.15;
+                ctx.globalAlpha = 0.2;
                 ctx.lineWidth = 1;
 
                 // Concentric HUD Circles
@@ -362,7 +491,7 @@ with tab_ember:
                 ctx.save();
                 ctx.strokeStyle = secondaryColor;
                 ctx.lineWidth = 1.5;
-                ctx.globalAlpha = 0.4;
+                ctx.globalAlpha = 0.45;
                 const rayCount = 16;
                 for (let i = 0; i < rayCount; i++) {{
                     const rayAngle = (i * Math.PI * 2 / rayCount) + rotationY * 0.5;
@@ -392,9 +521,9 @@ with tab_ember:
                     ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
                     
                     ctx.strokeStyle = i % 2 === 0 ? primaryColor : secondaryColor;
-                    ctx.globalAlpha = 0.5 + (i * 0.05);
-                    ctx.lineWidth = 1.8;
-                    ctx.shadowBlur = 10;
+                    ctx.globalAlpha = 0.6 + (i * 0.04);
+                    ctx.lineWidth = 2.0;
+                    ctx.shadowBlur = 12;
                     ctx.shadowColor = primaryColor;
                     ctx.stroke();
                     ctx.restore();
@@ -426,7 +555,7 @@ with tab_ember:
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2);
                 ctx.fillStyle = "#ffffff";
-                ctx.shadowBlur = 35;
+                ctx.shadowBlur = 40;
                 ctx.shadowColor = primaryColor;
                 ctx.fill();
                 ctx.restore();
@@ -443,7 +572,7 @@ with tab_ember:
     components.html(jarvis_canvas_html, height=620)
 
     # Telemetry metrics
-    st.subheader("⚙️ JARVIS System Diagnostics")
+    st.markdown("### ⚙️ JARVIS System Diagnostics")
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Core Temperature", "89.18 °C", "-0.4°C")
     m2.metric("Magnetic Shield", "4.8 Tesla", "100% Nominal")
