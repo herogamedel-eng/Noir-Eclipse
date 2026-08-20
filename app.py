@@ -54,21 +54,22 @@ st.markdown("""
 
 st.title("⚡ Noir -Eclipse")
 
-# Helper function for system prompt
+# Helper function for system prompt with English as standard default
 def get_system_prompt(target_lang: str) -> str:
     instructions = (
         "You are Noir -Eclipse, an advanced Personal AI Assistant. "
         "Assist with general tasks, answering questions accurately and concisely."
     )
-    if target_lang != "None (Standard AI)":
+    if target_lang != "English":
         instructions += f" Translate your final response into {target_lang}."
+    else:
+        instructions += " Always respond in English."
     return instructions
 
 # --- AUTOMATIC SESSION INITIALIZATION ---
 if "chat_library" not in st.session_state:
     st.session_state.chat_library = {}
 
-# Start a fresh chat session whenever the site opens or reloads
 if "current_chat_id" not in st.session_state:
     st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
     st.session_state.messages = []
@@ -81,9 +82,12 @@ with st.sidebar:
         "Choose Groq Model",
         ["⚡ Dynamic Auto-Router", "Llama 3.3 70B (High Intelligence)", "Llama 3.1 8B (Fast Response)"]
     )
+    
+    # English set as standard default option (index=0)
     target_lang = st.selectbox(
         "Target Language", 
-        ["None (Standard AI)", "Spanish", "French", "German", "Chinese", "Hindi", "Japanese"]
+        ["English", "Spanish", "French", "German", "Chinese", "Hindi", "Japanese"],
+        index=0
     )
 
     st.divider()
@@ -91,18 +95,14 @@ with st.sidebar:
     # --- SIDEBAR LIBRARY ---
     st.header("📚 Library")
 
-    # Button to force a new chat manually
     if st.button("➕ Start New Chat", use_container_width=True):
-        # Save active conversation if it contains user messages
         if len(st.session_state.messages) > 1:
             st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
         
-        # Reset to new session
         st.session_state.current_chat_id = f"New Chat ({datetime.now().strftime('%H:%M:%S')})"
         st.session_state.messages = []
         st.rerun()
 
-    # Saved Archives List
     if st.session_state.chat_library:
         st.subheader("🗂️ Auto-Saved Chats")
         selected_archive = st.selectbox("Select Previous Session", list(st.session_state.chat_library.keys()))
@@ -118,7 +118,6 @@ with st.sidebar:
                 del st.session_state.chat_library[selected_archive]
                 st.rerun()
 
-    # Export active session
     if len(st.session_state.messages) > 1:
         st.subheader("📥 Export")
         chat_json = json.dumps(st.session_state.messages, indent=2)
@@ -130,14 +129,14 @@ with st.sidebar:
             use_container_width=True
         )
 
-# Initialize or update system prompt in active session
+# System prompt binding
 sys_prompt = get_system_prompt(target_lang)
 if len(st.session_state.messages) == 0:
     st.session_state.messages = [{"role": "system", "content": sys_prompt}]
 else:
     st.session_state.messages[0] = {"role": "system", "content": sys_prompt}
 
-# Display Active Chat Messages
+# Display Active Chat History
 for msg in st.session_state.messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
@@ -161,7 +160,6 @@ if text_prompt:
 
 # Process User Query
 if prompt:
-    # Rename session title dynamically based on the first user message
     if len(st.session_state.messages) == 1:
         st.session_state.current_chat_id = f"{prompt[:18]}... ({datetime.now().strftime('%H:%M')})"
 
@@ -183,5 +181,5 @@ if prompt:
         st.write(ai_reply)
         st.session_state.messages.append({"role": "assistant", "content": ai_reply})
 
-    # --- AUTO-SAVE AFTER EVERY RESPONSE ---
+    # Auto-save after response
     st.session_state.chat_library[st.session_state.current_chat_id] = st.session_state.messages.copy()
